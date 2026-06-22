@@ -1,0 +1,35 @@
+# ─── TCC / Documentos acadêmicos ───
+*.docx
+*.pdf
+# .txt específicos do TCC (não genérico — requirements.txt é versionado)
+/Relatorio_2026.txt
+/base.txt
+/Relatório*.txt
+/ShortPaper*.txt
+apresentacao_oral_tgi.md
+gerar_*.py
+# ─── Python ───
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.venv*/
+venv/
+*.egg
+dist/
+build/
+# ─── Node / Frontend ───
+node_modules/
+.pnpm-store/
+# ─── IDE / Editor ───
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+# ─── OS ───
+.DS_Store
+Thumbs.db
+# ─── Docker ───
+.env
+# (manter .env.example versionado)
