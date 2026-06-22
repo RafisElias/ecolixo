@@ -1,0 +1,63 @@
+services:
+  db:
+    image: postgis/postgis:15-3.3
+    container_name: ecolixo_db
+    environment:
+      POSTGRES_USER: ecolixo
+      POSTGRES_PASSWORD: ecolixo123
+      POSTGRES_DB: ecolixo
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/01_init.sql
+      - ./database/seed.sql:/docker-entrypoint-initdb.d/02_seed.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ecolixo"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    container_name: ecolixo_backend
+    env_file: ./backend/.env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - uploads_data:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  frontend:
+    build: ./frontend
+    container_name: ecolixo_frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      # Source + config para hot-reload (sem node_modules — usa volume nomeado)
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+      - ./frontend/index.html:/app/index.html
+      - ./frontend/package.json:/app/package.json
+      - ./frontend/pnpm-workspace.yaml:/app/pnpm-workspace.yaml
+      - ./frontend/tsconfig.json:/app/tsconfig.json
+      - ./frontend/vite.config.js:/app/vite.config.js
+      - ./frontend/biome.json:/app/biome.json
+      - ./frontend/.npmrc:/app/.npmrc
+      # Volumes nomeados: isolam node_modules/.pnpm-store do sistema host
+      - node_modules:/app/node_modules
+      - pnpm_store:/app/.pnpm-store
+    depends_on:
+      - backend
+    environment:
+      - VITE_API_URL=http://localhost:8000
+
+volumes:
+  postgres_data:
+  uploads_data:
+  node_modules:
+  pnpm_store:
