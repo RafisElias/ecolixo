@@ -5,6 +5,8 @@ import Navbar from "./components/Navbar";
 import { useAuth } from "./contexts/AuthContext";
 
 const Home = lazy(() => import("./pages/Home"));
+const PickupServices = lazy(() => import("./pages/PickupServices"));
+const EditPickupService = lazy(() => import("./pages/EditPickupService"));
 const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
 const MapPage = lazy(() => import("./pages/MapPage"));
@@ -41,6 +43,22 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/home" element={<Home />} />
+            <Route
+              path="/services/:serviceId/edit"
+              element={
+                <PrivateRoute>
+                  <EditPickupService />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/services"
+              element={
+                <PrivateRoute>
+                  <PickupServices />
+                </PrivateRoute>
+              }
+            />
             <Route path="/login" element={user ? <Navigate to="/map" /> : <Login />} />
             <Route path="/register" element={user ? <Navigate to="/map" /> : <Register />} />
             <Route

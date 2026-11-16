@@ -3,6 +3,8 @@ import L from "leaflet";
 import { Suspense, memo, useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+import CollectionPointDetails from "../components/CollectionPointDetails";
+import ServiceCoverageLayer from "../components/ServiceCoverageLayer";
 import { useCategories } from "../hooks/useCategories";
 import { fetchHeatmap, fetchPoints } from "../services/pointService";
 import type { DisposalPoint } from "../types";
@@ -16,12 +18,6 @@ L.Icon.Default.mergeOptions({
 });
 
 // ─── Constantes ──────────────────────────────────────────────────
-const STATUS_LABELS: Record<string, string> = {
-  pending: "Pendente",
-  under_review: "Em análise",
-  resolved: "Resolvido",
-};
-
 interface Filters {
   status: string;
   category_id: string;
@@ -147,29 +143,7 @@ const PointMarkers = memo(function PointMarkers({
           icon={coloredIcon(p.categories?.[0]?.map_color || "#757575")}
         >
           <Popup>
-            <div style={{ minWidth: 180 }}>
-              <strong>
-                {(p.categories || []).map((c) => c.name).join(", ") || "Sem categoria"}
-              </strong>
-              <div style={{ margin: "4px 0" }}>
-                <span className={`badge badge-${p.status}`}>{STATUS_LABELS[p.status]}</span>
-              </div>
-              {p.description && <p style={{ fontSize: 12, color: "#555" }}>{p.description}</p>}
-              {p.photo_url && (
-                <img
-                  src={p.photo_url}
-                  alt="foto"
-                  style={{
-                    width: "100%",
-                    borderRadius: 6,
-                    marginTop: 6,
-                  }}
-                />
-              )}
-              <p style={{ fontSize: 11, color: "#999", marginTop: 4 }}>
-                {new Date(p.created_at).toLocaleDateString("pt-BR")}
-              </p>
-            </div>
+            <CollectionPointDetails point={p} />
           </Popup>
         </Marker>
       ))}
@@ -273,10 +247,12 @@ const Toolbar = memo(function Toolbar({
 const MapContent = memo(function MapContent({
   filters,
   heatmap,
+  showServices,
   onCount,
 }: {
   filters: Filters;
   heatmap: boolean;
+  showServices: boolean;
   onCount: (n: number) => void;
 }) {
   return (
@@ -285,6 +261,7 @@ const MapContent = memo(function MapContent({
         attribution='&copy; <a href="https://www.openstreetmap.org">OpenStreetMap</a>'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
+      {showServices && <ServiceCoverageLayer categoryId={filters.category_id} />}
       {heatmap ? (
         <HeatmapLayer active />
       ) : (
@@ -321,6 +298,7 @@ export default function MapPage() {
     category_id: "",
   });
   const [heatmap, setHeatmap] = useState(false);
+  const [showServices, setShowServices] = useState(false);
   const [pointCount, setPointCount] = useState(0);
   const [isPending, startTransition] = useTransition();
 
@@ -355,7 +333,33 @@ export default function MapPage() {
         isPending={isPending}
       />
 
-      <div style={{ flex: 1 }}>
+      <div
+        style={{
+          padding: "8px 16px",
+          background: "#fff",
+          fontSize: 13,
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 12,
+        }}
+      >
+        <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <input
+            type="checkbox"
+            checked={showServices}
+            onChange={(e) => setShowServices(e.target.checked)}
+          />
+          Mostrar serviços de retirada
+        </label>
+        <span>● Pontos de coleta · 🚚 Serviços (círculos azuis: área aproximada)</span>
+        {showServices && (
+          <span>
+            O filtro de material vale para ambos; status e mapa de calor se aplicam apenas aos
+            pontos de coleta.
+          </span>
+        )}
+      </div>
+      <div style={{ flex: 1, minHeight: 0 }}>
         <Suspense
           fallback={
             <div
@@ -372,7 +376,12 @@ export default function MapPage() {
             </div>
           }
         >
-          <MapContent filters={filters} heatmap={heatmap} onCount={handleCount} />
+          <MapContent
+            filters={filters}
+            heatmap={heatmap}
+            showServices={showServices}
+            onCount={handleCount}
+          />
         </Suspense>
       </div>
     </div>

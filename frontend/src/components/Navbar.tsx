@@ -48,8 +48,10 @@ export default function Navbar() {
         display: "flex",
         alignItems: "center",
         padding: "0 20px",
-        height: 56,
-        gap: 24,
+        minHeight: 56,
+        flexWrap: "wrap",
+        paddingBlock: 12,
+        gap: 16,
         flexShrink: 0,
       }}
     >
@@ -58,6 +60,7 @@ export default function Navbar() {
       </Link>
 
       <NavLink to="/map" label="Mapa" current={location.pathname} />
+      <NavLink to="/services" label="Serviços" current={location.pathname} />
       {!isManager && <NavLink to="/new-report" label="Registrar" current={location.pathname} />}
       {isManager && <NavLink to="/dashboard" label="Painel" current={location.pathname} />}
       {isManager && <NavLink to="/analytics" label="Relatórios" current={location.pathname} />}

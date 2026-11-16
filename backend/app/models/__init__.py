@@ -3,3 +3,4 @@ from app.models.waste_category import WasteCategory
 from app.models.disposal_point import DisposalPoint
 from app.models.notification import Notification
 from app.models.report import Report
+from app.models.pickup_service import PickupService

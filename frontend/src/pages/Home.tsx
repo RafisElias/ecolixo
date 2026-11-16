@@ -3,6 +3,11 @@ import { useAuth } from "../contexts/AuthContext";
 
 const FEATURES = [
   {
+    icon: "🚚",
+    title: "Serviços de retirada",
+    desc: "Encontre pessoas e empresas que retiram itens para reciclagem. Consulte materiais aceitos, região de atendimento e contato, ou divulgue seu serviço.",
+  },
+  {
     icon: "🗺️",
     title: "Mapa interativo",
     desc: "Visualize todos os pontos de coleta de resíduos eletrônicos próximos a você em um mapa interativo com filtros por categoria e status.",

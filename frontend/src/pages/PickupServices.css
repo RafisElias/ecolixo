@@ -1,0 +1,20 @@
+.pickup-page { width: 100%; }
+.pickup-intro { max-width: 800px; margin: 0 auto 24px; line-height: 1.7; color: var(--text-muted); }
+.pickup-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 20px; }
+.pickup-toolbar, .pickup-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.pickup-toolbar { justify-content: space-between; margin-bottom: 20px; }
+.pickup-toolbar .form-group { margin: 0; }
+.pickup-form { max-width: 720px; margin: 0 auto 24px; }
+.pickup-form h3, .pickup-card h3 { margin-bottom: 10px; }
+.pickup-form > p { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
+.pickup-form fieldset { border: 0; min-width: 0; padding: 0; }
+.pickup-form .pickup-materials { margin-bottom: 16px; }
+.pickup-materials legend { font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+.pickup-materials label { display: flex; align-items: center; gap: 8px; padding: 5px 0; }
+.pickup-card { overflow-wrap: anywhere; }
+.pickup-card > p { color: var(--text-muted); line-height: 1.6; }
+.pickup-card dl { margin: 16px 0; }
+.pickup-card dt { font-size: 12px; color: var(--text-muted); margin-top: 10px; }
+.pickup-card dd { margin: 4px 0; }
+.pickup-description { white-space: pre-wrap; margin-bottom: 16px; }
+.pickup-form [role="alert"] { color: var(--danger); margin-bottom: 12px; }

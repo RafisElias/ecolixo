@@ -12,6 +12,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./database/init.sql:/docker-entrypoint-initdb.d/01_init.sql
       - ./database/seed.sql:/docker-entrypoint-initdb.d/02_seed.sql
+      - ./database/pickup_services.sql:/docker-entrypoint-initdb.d/03_pickup_services.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ecolixo"]
       interval: 10s

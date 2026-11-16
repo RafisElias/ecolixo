@@ -13,7 +13,10 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (r) => r,
   (err) => {
-    if (err.response?.status === 401) {
+    // Credenciais inválidas devem ser tratadas pelo formulário, sem recarregar a página.
+    const path = new URL(err.config?.url || "/", window.location.origin).pathname;
+    const isAuthRequest = /\/auth\/(login|register)\/?$/.test(path);
+    if (err.response?.status === 401 && !isAuthRequest) {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       window.location.href = "/login";

@@ -50,6 +50,27 @@ export interface Notification {
   created_at: string;
 }
 
+export interface PickupServiceInput {
+  name: string;
+  provider_type: "individual" | "company";
+  contact: string;
+  service_area: string;
+  description: string;
+  pricing: "free" | "paid" | "on_request";
+  category_ids: number[];
+  reference_latitude?: number | null;
+  reference_longitude?: number | null;
+  radius_km?: number | null;
+}
+
+export interface PickupService extends Omit<PickupServiceInput, "category_ids"> {
+  id: number;
+  user_id: number;
+  categories: Category[];
+  created_at: string;
+  updated_at: string;
+}
+
 // ---- Auth context ----
 
 export interface AuthContextType {
