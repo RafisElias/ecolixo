@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Suspense, useActionState, useRef, useState } from "react";
 import toast from "react-hot-toast";
+import { apiErrorMessage } from "../api/errors";
 import MultiSelect from "../components/MultiSelect";
 import { useCategories } from "../hooks/useCategories";
 import { createPoint } from "../services/pointService";
@@ -85,11 +86,7 @@ export default function NewReport() {
         formRef.current?.reset();
         return { success: true, error: null };
       } catch (err: unknown) {
-        const detail =
-          err && typeof err === "object" && "response" in err
-            ? (err as { response: { data: { detail: string } } }).response?.data?.detail
-            : "Erro ao registrar";
-        return { error: detail || "Erro ao registrar", success: false };
+        return { error: apiErrorMessage(err, "Erro ao registrar"), success: false };
       }
     },
     { success: false, error: null },

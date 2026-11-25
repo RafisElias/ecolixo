@@ -36,7 +36,7 @@ async def get_current_user(
 ) -> User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
+        detail="Sessão inválida ou expirada",
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
@@ -56,5 +56,5 @@ async def get_current_user(
 
 async def require_manager(current_user: User = Depends(get_current_user)) -> User:
     if current_user.type != "manager":
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Manager access required")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso restrito a gestores")
     return current_user

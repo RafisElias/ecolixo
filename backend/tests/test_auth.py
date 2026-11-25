@@ -1,0 +1,60 @@
+from app.config import settings
+from tests.base import IntegrationTestCase
+
+
+class AuthTests(IntegrationTestCase):
+    override_auth = False
+
+    def body(self, **overrides) -> dict:
+        data = {
+            "name": "Ana", "email": f"ana{self.suffix}@example.com",
+            "password": "segredo1", "password_confirm": "segredo1", "type": "citizen",
+        }
+        data.update(overrides)
+        return data
+
+    async def test_register_login_and_use_token(self):
+        response = await self.client.post("/auth/register", json=self.body())
+        self.assertEqual(response.status_code, 201, response.text)
+        self.assertNotIn("password", response.json())
+        login = await self.client.post("/auth/login", json={"email": self.body()["email"], "password": "segredo1"})
+        self.assertEqual(login.status_code, 200, login.text)
+        token = login.json()["access_token"]
+        journey = await self.client.get("/gamification/journey", headers={"Authorization": f"Bearer {token}"})
+        self.assertEqual(journey.status_code, 200, journey.text)
+
+    async def test_invalid_login_and_token(self):
+        await self.client.post("/auth/register", json=self.body())
+        wrong = await self.client.post("/auth/login", json={"email": self.body()["email"], "password": "errada1"})
+        self.assertEqual(wrong.status_code, 401)
+        self.assertEqual(wrong.json()["detail"], "E-mail ou senha incorretos")
+        response = await self.client.get("/gamification/journey", headers={"Authorization": "Bearer invalido"})
+        self.assertEqual(response.status_code, 401)
+
+    async def test_register_validation(self):
+        await self.client.post("/auth/register", json=self.body())
+        duplicate = await self.client.post("/auth/register", json=self.body())
+        self.assertEqual(duplicate.json()["detail"], "Este e-mail já está cadastrado")
+        mismatch = await self.client.post("/auth/register", json=self.body(email=f"x{self.suffix}@example.com", password_confirm="outra12"))
+        self.assertEqual(mismatch.json()["detail"], "As senhas não coincidem")
+        short = await self.client.post("/auth/register", json=self.body(email=f"y{self.suffix}@example.com", password="123", password_confirm="123"))
+        self.assertEqual(short.status_code, 422)
+
+    async def test_manager_registration_code(self):
+        original, settings.gestor_registration_code = settings.gestor_registration_code, "codigo-certo"
+        try:
+            missing = await self.client.post("/auth/register", json=self.body(type="manager"))
+            self.assertEqual(missing.status_code, 400)
+            wrong = await self.client.post("/auth/register", json=self.body(type="manager", registration_code="errado"))
+            self.assertEqual(wrong.json()["detail"], "Código de cadastro de gestor inválido")
+            ok = await self.client.post("/auth/register", json=self.body(type="manager", registration_code="codigo-certo"))
+            self.assertEqual(ok.status_code, 201, ok.text)
+            self.assertEqual(ok.json()["type"], "manager")
+            # Sem código configurado no servidor, ninguém se cadastra como gestor.
+            settings.gestor_registration_code = ""
+            disabled = await self.client.post(
+                "/auth/register", json=self.body(email=f"z{self.suffix}@example.com", type="manager", registration_code="x"),
+            )
+            self.assertEqual(disabled.status_code, 400)
+        finally:
+            settings.gestor_registration_code = original

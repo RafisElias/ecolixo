@@ -19,24 +19,24 @@ async def list_points(
     status: PointStatus | None = Query(None),
     review_status: ReviewStatus | None = Query(None),
     category_id: int | None = Query(None),
-    lat: float | None = Query(None),
-    lon: float | None = Query(None),
-    radius_km: float = Query(10.0),
+    lat: float | None = Query(None, ge=-90, le=90),
+    lon: float | None = Query(None, ge=-180, le=180),
+    radius_km: float = Query(10.0, gt=0, le=500),
     db: AsyncSession = Depends(get_db),
-    _: User = Depends(get_current_user),
+    viewer: User = Depends(get_current_user),
 ):
     return await point_service.list_points(
         db, status_filter=status, review_status=review_status, category_id=category_id,
-        lat=lat, lon=lon, radius_km=radius_km,
+        lat=lat, lon=lon, radius_km=radius_km, viewer=viewer,
     )
 
 
 @router.post("", response_model=DisposalPointOut, status_code=status.HTTP_201_CREATED)
 async def create_point(
-    latitude: float = Form(...),
-    longitude: float = Form(...),
+    latitude: float = Form(..., ge=-90, le=90),
+    longitude: float = Form(..., ge=-180, le=180),
     category_ids: str = Form("[]"),
-    description: str | None = Form(None),
+    description: str | None = Form(None, max_length=2000),
     photo: UploadFile | None = File(None),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),

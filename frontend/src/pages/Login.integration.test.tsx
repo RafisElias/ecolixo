@@ -41,7 +41,7 @@ describe("Login com cliente HTTP e autenticação reais", () => {
         status: 401,
         statusText: "Unauthorized",
         headers: new AxiosHeaders(),
-        data: { detail: "Invalid credentials" },
+        data: { detail: "E-mail ou senha incorretos" },
         config,
       });
     };

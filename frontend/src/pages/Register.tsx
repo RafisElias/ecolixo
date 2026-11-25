@@ -1,6 +1,7 @@
 import { useActionState, useState } from "react";
 import toast from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
+import { apiErrorMessage } from "../api/errors";
 import { useAuth } from "../contexts/AuthContext";
 import type { RegisterState } from "../types";
 
@@ -28,11 +29,7 @@ export default function Register() {
         );
         return { error: null, success: true };
       } catch (err: unknown) {
-        const detail =
-          err && typeof err === "object" && "response" in err
-            ? (err as { response: { data: { detail: string } } }).response?.data?.detail
-            : "Erro ao cadastrar";
-        return { error: detail || "Erro ao cadastrar", success: false };
+        return { error: apiErrorMessage(err, "Erro ao cadastrar"), success: false };
       }
     },
     { error: null, success: false },

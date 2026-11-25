@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { apiErrorMessage } from "../api/errors";
 import { useAuth } from "../contexts/AuthContext";
 import { fetchPoints, reviewPoint, updatePointStatus } from "../services/pointService";
 import type { DisposalPoint, ReviewStatus } from "../types";
@@ -16,11 +17,6 @@ const REVIEW_LABELS: Record<ReviewStatus, string> = {
   approved: "Aprovado",
   rejected: "Rejeitado",
 };
-
-function errorDetail(err: unknown) {
-  const detail = (err as { response?: { data?: { detail?: unknown } } }).response?.data?.detail;
-  return typeof detail === "string" ? detail : "Erro ao revisar registro";
-}
 
 export default function ManagerDashboard() {
   const queryClient = useQueryClient();
@@ -43,7 +39,7 @@ export default function ManagerDashboard() {
       toast.success(review === "approved" ? "Contribuição aprovada" : "Revisão registrada");
       queryClient.invalidateQueries({ queryKey: ["points"] });
     },
-    onError: (err) => toast.error(errorDetail(err)),
+    onError: (err) => toast.error(apiErrorMessage(err, "Erro ao revisar registro")),
   });
 
   const statusMutation = useMutation({

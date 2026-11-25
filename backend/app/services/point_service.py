@@ -12,11 +12,11 @@ from geoalchemy2.types import Geometry as GeoGeometry
 from app.models.disposal_point import DisposalPoint, PointStatus, ReviewStatus, disposal_point_categories
 from app.models.notification import Notification
 from app.models.waste_category import WasteCategory
-from app.models.user import User
+from app.models.user import User, UserType
 from app.schemas.disposal_point import DisposalPointOut, CategoryOut, DisposalPointStatusUpdate
 from app.schemas.gamification import ReviewUpdate
 from app.services import gamification_service
-from app.services.file_service import validate_and_save_photo
+from app.services.file_service import save_photo, validate_photo
 
 STATUS_LABELS = {
     "pending": "Pendente",
@@ -29,6 +29,20 @@ REVIEW_MESSAGES = {
     "rejected": "não foi aprovado pela gestão após revisão.",
     "pending": "voltou para revisão pela gestão.",
 }
+
+
+def _is_manager(user: User | None) -> bool:
+    return user is not None and user.type == UserType.manager
+
+
+def _parse_category_ids(raw: str) -> list[int]:
+    try:
+        ids = json.loads(raw)
+    except json.JSONDecodeError:
+        ids = None
+    if not isinstance(ids, list) or not all(isinstance(i, int) and not isinstance(i, bool) for i in ids):
+        raise HTTPException(status_code=422, detail="category_ids deve ser uma lista JSON de números inteiros")
+    return list(dict.fromkeys(ids))
 
 
 def _make_location(lat: float, lon: float):
@@ -73,6 +87,7 @@ async def list_points(
     lat: float | None = None,
     lon: float | None = None,
     radius_km: float = 10.0,
+    viewer: User | None = None,
 ) -> list[DisposalPointOut]:
     loc = cast(DisposalPoint.location, GeoGeometry)
     q = select(
@@ -85,6 +100,9 @@ async def list_points(
         q = q.where(DisposalPoint.status == status_filter)
     if review_status:
         q = q.where(DisposalPoint.review_status == review_status.value)
+    if not _is_manager(viewer):
+        # Registros rejeitados pela revisão não aparecem no mapa público.
+        q = q.where(DisposalPoint.review_status != ReviewStatus.rejected.value)
     if category_id:
         q = q.where(
             DisposalPoint.id.in_(
@@ -111,19 +129,18 @@ async def create_point(
     description: str | None = None,
     photo=None,
 ) -> DisposalPointOut:
-    try:
-        cat_ids = json.loads(category_ids)
-    except json.JSONDecodeError:
-        cat_ids = []
-
-    photo_url = validate_and_save_photo(photo)
-
+    cat_ids = _parse_category_ids(category_ids)
     categories: Sequence[WasteCategory] = []
     if cat_ids:
         result = await db.execute(
             select(WasteCategory).where(WasteCategory.id.in_(cat_ids))
         )
         categories = result.scalars().all()
+        if len(categories) != len(cat_ids):
+            raise HTTPException(status_code=422, detail="Uma ou mais categorias são inválidas")
+
+    # Grava a foto só depois de validar todo o resto, para não deixar arquivos órfãos.
+    photo_url = save_photo(validate_photo(photo))
 
     point = DisposalPoint(
         user_id=current_user.id,
@@ -151,7 +168,7 @@ async def update_point_status(
     )
     point = result.scalar_one_or_none()
     if not point:
-        raise HTTPException(status_code=404, detail="Point not found")
+        raise HTTPException(status_code=404, detail="Ponto de coleta não encontrado")
 
     point.status = body.status
     await db.flush()
@@ -182,7 +199,7 @@ async def review_point(
     )
     point = result.scalar_one_or_none()
     if not point:
-        raise HTTPException(status_code=404, detail="Point not found")
+        raise HTTPException(status_code=404, detail="Ponto de coleta não encontrado")
     if point.user_id == reviewer.id:
         raise HTTPException(status_code=403, detail="Gestores não podem revisar a própria contribuição")
 
@@ -215,7 +232,7 @@ async def get_heatmap_data(db: AsyncSession) -> list[list[float]]:
         select(
             func.ST_Y(loc).label("lat"),
             func.ST_X(loc).label("lon"),
-        )
+        ).where(DisposalPoint.review_status != ReviewStatus.rejected.value)
     )
     rows = result.all()
     return [[r.lat, r.lon, 1.0] for r in rows]
