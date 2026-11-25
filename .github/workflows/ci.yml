@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    runs-on: ubuntu-24.04
+    services:
+      db:
+        image: postgis/postgis:15-3.3
+        env:
+          POSTGRES_USER: ecolixo
+          POSTGRES_PASSWORD: ecolixo
+          POSTGRES_DB: ecolixo
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U ecolixo"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql+asyncpg://ecolixo:ecolixo@localhost:5432/ecolixo
+      SECRET_KEY: ci-only-secret
+      UPLOAD_DIR: /tmp/ecolixo-uploads
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements*.txt
+      - run: pip install -r requirements-dev.txt
+      - run: ruff check .
+      - run: alembic upgrade head
+      - run: python -m unittest discover -s tests -v
+
+  frontend:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      # Usa a versão do pnpm fixada em "packageManager".
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec biome ci src/
+      - run: pnpm exec tsc --noEmit
+      - run: pnpm exec vitest run
