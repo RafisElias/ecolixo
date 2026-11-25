@@ -192,56 +192,58 @@ export default function Journey() {
 
   const j = journey.data;
   return (
-    <div className="page journey-page">
-      <h2 className="page-title">Minha jornada</h2>
-      <p className="journey-intro">
-        Aprenda sobre o descarte de eletrônicos e contribua com o mapa. Os pontos reconhecem sua
-        participação no EcoLixo: não medem quantidade reciclada nem certificam locais. Cadastros de
-        pontos de coleta só pontuam depois de revisados e aprovados pela gestão.
-      </p>
+    <div className="page">
+      <div className="journey-page">
+        <h2 className="page-title">Minha jornada</h2>
+        <p className="journey-intro">
+          Aprenda sobre o descarte de eletrônicos e contribua com o mapa. Os pontos reconhecem sua
+          participação no EcoLixo: não medem quantidade reciclada nem certificam locais. Cadastros
+          de pontos de coleta só pontuam depois de revisados e aprovados pela gestão.
+        </p>
 
-      <Summary
-        balance={j.balance}
-        missions={`${j.missions_completed}/${j.missions_total}`}
-        contributions={[
-          { label: "contribuições aprovadas", value: j.contributions.approved ?? 0 },
-          { label: "aguardando revisão", value: j.contributions.pending ?? 0 },
-        ]}
-      />
+        <Summary
+          balance={j.balance}
+          missions={`${j.missions_completed}/${j.missions_total}`}
+          contributions={[
+            { label: "contribuições aprovadas", value: j.contributions.approved ?? 0 },
+            { label: "aguardando revisão", value: j.contributions.pending ?? 0 },
+          ]}
+        />
 
-      <section aria-labelledby="journey-missions">
-        <h3 id="journey-missions">Missões educativas</h3>
-        <ul className="journey-list">
-          {(missions.data ?? []).map((m) => (
-            <MissionCard key={m.key} mission={m} />
-          ))}
-        </ul>
-      </section>
-
-      <section aria-labelledby="journey-achievements">
-        <h3 id="journey-achievements">Conquistas</h3>
-        <ul className="journey-achievements">
-          {j.achievements.map((a) => (
-            <AchievementCard key={a.key} achievement={a} />
-          ))}
-        </ul>
-      </section>
-
-      <section aria-labelledby="journey-history">
-        <h3 id="journey-history">Histórico de pontos</h3>
-        {j.history.length === 0 ? (
-          <p className="journey-muted">
-            Nenhum ponto ainda. Conclua uma missão ou{" "}
-            <Link to="/new-report">registre um ponto de coleta</Link>.
-          </p>
-        ) : (
-          <ul className="card journey-history">
-            {j.history.map((e) => (
-              <HistoryItem key={e.id} event={e} />
+        <section aria-labelledby="journey-missions">
+          <h3 id="journey-missions">Missões educativas</h3>
+          <ul className="journey-list">
+            {(missions.data ?? []).map((m) => (
+              <MissionCard key={m.key} mission={m} />
             ))}
           </ul>
-        )}
-      </section>
+        </section>
+
+        <section aria-labelledby="journey-achievements">
+          <h3 id="journey-achievements">Conquistas</h3>
+          <ul className="journey-achievements">
+            {j.achievements.map((a) => (
+              <AchievementCard key={a.key} achievement={a} />
+            ))}
+          </ul>
+        </section>
+
+        <section aria-labelledby="journey-history">
+          <h3 id="journey-history">Histórico de pontos</h3>
+          {j.history.length === 0 ? (
+            <p className="journey-muted">
+              Nenhum ponto ainda. Conclua uma missão ou{" "}
+              <Link to="/new-report">registre um ponto de coleta</Link>.
+            </p>
+          ) : (
+            <ul className="card journey-history">
+              {j.history.map((e) => (
+                <HistoryItem key={e.id} event={e} />
+              ))}
+            </ul>
+          )}
+        </section>
+      </div>
     </div>
   );
 }
