@@ -2,6 +2,7 @@
   "name": "ecolixo-frontend",
   "version": "1.0.0",
   "type": "module",
+  "packageManager": "pnpm@12.18.0",
   "scripts": {
     "dev": "vite --host",
     "build": "tsc --noEmit && vite build",
