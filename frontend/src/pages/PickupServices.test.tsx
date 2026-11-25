@@ -3,11 +3,7 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  deletePickupService,
-  fetchPickupServices,
-  savePickupService,
-} from "../services/pickupService";
+import { deletePickupService, fetchPickupServices } from "../services/pickupService";
 import PickupServices from "./PickupServices";
 
 vi.mock("../contexts/AuthContext", () => ({ useAuth: () => ({ user: { id: 1 } }) }));
@@ -46,17 +42,9 @@ function setup() {
   return userEvent.setup();
 }
 
-async function fillForm(user: ReturnType<typeof userEvent.setup>) {
-  await user.click(screen.getByRole("button", { name: "Divulgar meu serviço" }));
-  await user.type(screen.getByLabelText("Nome da pessoa ou empresa"), "Meu serviço");
-  await user.type(screen.getByLabelText("Contato (telefone ou e-mail)"), "contato@example.com");
-  await user.type(screen.getByLabelText("Região de atendimento"), "São Paulo");
-}
-
 beforeEach(() => {
   vi.resetAllMocks();
   vi.mocked(fetchPickupServices).mockResolvedValue([]);
-  vi.mocked(savePickupService).mockResolvedValue(service);
 });
 
 describe("Serviços de retirada", () => {
@@ -75,51 +63,13 @@ describe("Serviços de retirada", () => {
     await waitFor(() => expect(fetchPickupServices).toHaveBeenCalledWith("1"));
   });
 
-  it("não permite salvar sem selecionar material", async () => {
-    const user = setup();
-    await fillForm(user);
-    await user.click(screen.getByRole("button", { name: "Salvar serviço" }));
-    expect(await screen.findByRole("alert")).toHaveTextContent("Selecione ao menos um material");
-    expect(savePickupService).not.toHaveBeenCalled();
-  });
-
-  it("salva e revalida a listagem", async () => {
-    const user = setup();
-    await fillForm(user);
-    await user.click(screen.getByRole("checkbox", { name: "Pilhas" }));
-    await user.click(screen.getByRole("button", { name: "Salvar serviço" }));
-    await waitFor(() =>
-      expect(savePickupService).toHaveBeenCalledWith(
-        {
-          id: undefined,
-          body: {
-            name: "Meu serviço",
-            provider_type: "individual",
-            contact: "contato@example.com",
-            service_area: "São Paulo",
-            description: "",
-            pricing: "on_request",
-            category_ids: [1],
-            reference_latitude: null,
-            reference_longitude: null,
-            radius_km: null,
-          },
-        },
-        expect.anything(),
-      ),
+  it("leva a uma tela separada para divulgar serviço", async () => {
+    setup();
+    expect(await screen.findByRole("link", { name: "Divulgar meu serviço" })).toHaveAttribute(
+      "href",
+      "/services/new",
     );
-    await waitFor(() => expect(fetchPickupServices.mock.calls.length).toBeGreaterThan(1));
-    expect(screen.queryByRole("button", { name: "Salvar serviço" })).not.toBeInTheDocument();
-  });
-
-  it("preserva o formulário quando salvar falha", async () => {
-    vi.mocked(savePickupService).mockRejectedValue(new Error("Falha"));
-    const user = setup();
-    await fillForm(user);
-    await user.click(screen.getByRole("checkbox", { name: "Pilhas" }));
-    await user.click(screen.getByRole("button", { name: "Salvar serviço" }));
-    expect(await screen.findByRole("alert")).toHaveTextContent("Não foi possível salvar");
-    expect(screen.getByLabelText("Nome da pessoa ou empresa")).toHaveValue("Meu serviço");
+    expect(screen.queryByLabelText("Nome da pessoa ou empresa")).not.toBeInTheDocument();
   });
 
   it("oferece edição e remoção apenas para anúncios próprios", async () => {

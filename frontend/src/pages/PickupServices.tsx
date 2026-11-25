@@ -1,7 +1,6 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
-import PickupServiceForm from "../components/PickupServiceForm";
 import { useAuth } from "../contexts/AuthContext";
 import { useCategories } from "../hooks/useCategories";
 import { usePickupServiceMutations, usePickupServices } from "../hooks/usePickupServices";
@@ -14,7 +13,6 @@ export default function PickupServices() {
   const { user } = useAuth();
   const categories = useCategories();
   const [filter, setFilter] = useState("");
-  const [formOpen, setFormOpen] = useState(false);
   const { data: services = [], isPending, isError, refetch } = usePickupServices(filter);
   const { remove } = usePickupServiceMutations();
 
@@ -52,11 +50,10 @@ export default function PickupServices() {
             ))}
           </select>
         </div>
-        <button type="button" className="btn btn-primary" onClick={() => setFormOpen(true)}>
+        <Link className="btn btn-primary" to="/services/new">
           Divulgar meu serviço
-        </button>
+        </Link>
       </div>
-      {formOpen && <PickupServiceForm service={null} onClose={() => setFormOpen(false)} />}
       {isPending && <p role="status">Carregando serviços…</p>}
       {isError && (
         <div role="alert">
