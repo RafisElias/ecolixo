@@ -18,7 +18,10 @@ services:
       retries: 5
 
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+      args:
+        INSTALL_DEV: "true"
     container_name: ecolixo_backend
     env_file: ./backend/.env
     # O volume de uploads do desenvolvimento já existe com dono root.

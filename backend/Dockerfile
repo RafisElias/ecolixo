@@ -5,8 +5,10 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev gcc && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY requirements.txt requirements-dev.txt ./
+# INSTALL_DEV=true (Compose de desenvolvimento) inclui ferramentas como o ruff.
+ARG INSTALL_DEV=false
+RUN pip install --no-cache-dir -r $([ "$INSTALL_DEV" = "true" ] && echo requirements-dev.txt || echo requirements.txt)
 
 COPY . .
 

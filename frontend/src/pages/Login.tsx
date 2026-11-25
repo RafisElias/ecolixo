@@ -35,6 +35,8 @@ export default function Login() {
         return null;
       } catch (err) {
         if (isAxiosError(err) && err.response?.status === 401) return "Email ou senha incorretos";
+        if (isAxiosError(err) && err.response?.status === 429)
+          return "Muitas tentativas de login. Aguarde alguns minutos e tente novamente.";
         if (isAxiosError(err) && !err.response)
           return "Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.";
         return "Não foi possível entrar agora. Tente novamente em instantes.";

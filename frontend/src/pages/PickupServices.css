@@ -18,3 +18,4 @@
 .pickup-card dd { margin: 4px 0; }
 .pickup-description { white-space: pre-wrap; margin-bottom: 16px; }
 .pickup-form [role="alert"] { color: var(--danger); margin-bottom: 12px; }
+.pickup-confirm { flex-basis: 100%; font-weight: 600; color: var(--danger); }

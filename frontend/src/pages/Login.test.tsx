@@ -53,6 +53,20 @@ describe("Login", () => {
     expect(mockLogin).toHaveBeenCalledWith("ana@teste.com", "123456");
   });
 
+  it("explica o bloqueio temporário após muitas tentativas", async () => {
+    mockLogin.mockRejectedValueOnce({ isAxiosError: true, response: { status: 429 } });
+    const user = userEvent.setup();
+    const { container } = render(
+      <MemoryRouter>
+        <Login />
+      </MemoryRouter>,
+    );
+    await user.type(container.querySelector('input[name="email"]')!, "ana@teste.com");
+    await user.type(container.querySelector('input[name="password"]')!, "123456");
+    await user.click(screen.getByRole("button", { name: /entrar/i }));
+    expect(await screen.findByText(/Muitas tentativas de login/)).toBeDefined();
+  });
+
   it("exibe mensagem de erro quando login falha", async () => {
     mockLogin.mockRejectedValueOnce({ isAxiosError: true, response: { status: 401 } });
     const user = userEvent.setup();

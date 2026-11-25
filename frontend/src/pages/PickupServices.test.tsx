@@ -85,12 +85,15 @@ describe("Serviços de retirada", () => {
       "href",
       `/services/${service.id}/edit`,
     );
-    const confirm = vi.spyOn(window, "confirm").mockReturnValue(true);
     await user.click(within(own!).getByRole("button", { name: "Remover" }));
+    await user.click(within(own!).getByRole("button", { name: "Cancelar" }));
+    expect(deletePickupService).not.toHaveBeenCalled();
+    await user.click(within(own!).getByRole("button", { name: "Remover" }));
+    expect(within(own!).getByText(/Remover este anúncio\?/)).toBeInTheDocument();
+    await user.click(within(own!).getByRole("button", { name: "Confirmar remoção" }));
     await waitFor(() =>
       expect(deletePickupService).toHaveBeenCalledWith(service.id, expect.anything()),
     );
-    confirm.mockRestore();
   });
 
   it("mostra erro de consulta e permite tentar novamente", async () => {

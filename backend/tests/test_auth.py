@@ -1,9 +1,14 @@
 from app.config import settings
+from app.services.login_throttle import MAX_FAILURES, login_throttle
 from tests.base import IntegrationTestCase
 
 
 class AuthTests(IntegrationTestCase):
     override_auth = False
+
+    async def asyncSetUp(self):
+        await super().asyncSetUp()
+        login_throttle.reset()
 
     def body(self, **overrides) -> dict:
         data = {
@@ -58,3 +63,22 @@ class AuthTests(IntegrationTestCase):
             self.assertEqual(disabled.status_code, 400)
         finally:
             settings.gestor_registration_code = original
+
+    async def test_login_is_throttled_after_repeated_failures(self):
+        await self.client.post("/auth/register", json=self.body())
+        email = self.body()["email"]
+        for _ in range(MAX_FAILURES):
+            self.assertEqual((await self.client.post("/auth/login", json={"email": email, "password": "errada1"})).status_code, 401)
+        blocked = await self.client.post("/auth/login", json={"email": email, "password": "segredo1"})
+        self.assertEqual(blocked.status_code, 429)
+        self.assertIn("Retry-After", blocked.headers)
+        login_throttle.reset()
+        self.assertEqual((await self.client.post("/auth/login", json={"email": email, "password": "segredo1"})).status_code, 200)
+
+    async def test_successful_login_clears_failures(self):
+        await self.client.post("/auth/register", json=self.body())
+        email = self.body()["email"]
+        for _ in range(MAX_FAILURES - 1):
+            await self.client.post("/auth/login", json={"email": email, "password": "errada1"})
+        self.assertEqual((await self.client.post("/auth/login", json={"email": email, "password": "segredo1"})).status_code, 200)
+        self.assertEqual((await self.client.post("/auth/login", json={"email": email, "password": "errada1"})).status_code, 401)

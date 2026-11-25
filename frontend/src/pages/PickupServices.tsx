@@ -13,16 +13,18 @@ export default function PickupServices() {
   const { user } = useAuth();
   const categories = useCategories();
   const [filter, setFilter] = useState("");
+  const [confirmingId, setConfirmingId] = useState<number | null>(null);
   const { data: services = [], isPending, isError, refetch } = usePickupServices(filter);
   const { remove } = usePickupServiceMutations();
 
   async function handleRemove(service: PickupService) {
-    if (!window.confirm(`Remover o serviço “${service.name}”?`)) return;
     try {
       await remove.mutateAsync(service.id);
       toast.success("Serviço removido.");
     } catch {
       toast.error("Não foi possível remover o serviço.");
+    } finally {
+      setConfirmingId(null);
     }
   }
 
@@ -88,21 +90,43 @@ export default function PickupServices() {
                 : "Sem referência no mapa; consulte a região de atendimento acima."}
             </p>
             {service.description && <p className="pickup-description">{service.description}</p>}
-            {user?.id === service.user_id && (
-              <div className="pickup-actions">
-                <Link className="btn btn-outline btn-sm" to={`/services/${service.id}/edit`}>
-                  Editar
-                </Link>
-                <button
-                  type="button"
-                  className="btn btn-danger btn-sm"
-                  disabled={remove.isPending}
-                  onClick={() => handleRemove(service)}
-                >
-                  Remover
-                </button>
-              </div>
-            )}
+            {user?.id === service.user_id &&
+              (confirmingId === service.id ? (
+                <div className="pickup-actions" role="group" aria-label="Confirmar remoção">
+                  <p className="pickup-confirm">
+                    Remover este anúncio? Esta ação não pode ser desfeita.
+                  </p>
+                  <button
+                    type="button"
+                    className="btn btn-danger btn-sm"
+                    disabled={remove.isPending}
+                    onClick={() => handleRemove(service)}
+                  >
+                    {remove.isPending ? "Removendo…" : "Confirmar remoção"}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-outline btn-sm"
+                    disabled={remove.isPending}
+                    onClick={() => setConfirmingId(null)}
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              ) : (
+                <div className="pickup-actions">
+                  <Link className="btn btn-outline btn-sm" to={`/services/${service.id}/edit`}>
+                    Editar
+                  </Link>
+                  <button
+                    type="button"
+                    className="btn btn-danger btn-sm"
+                    onClick={() => setConfirmingId(service.id)}
+                  >
+                    Remover
+                  </button>
+                </div>
+              ))}
           </article>
         ))}
       </div>
