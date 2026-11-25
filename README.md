@@ -76,6 +76,22 @@ Testes HTTP com PostgreSQL (dados de teste revertidos por transação):
 docker compose exec -T backend python -m unittest discover -s tests -v
 ```
 
+## Produção
+
+`docker-compose.prod.yml` sobe três serviços: Caddy (HTTPS automático e frontend
+estático), API e PostgreSQL/PostGIS. Só o Caddy expõe portas (80/443); a API fica
+em `/api` na mesma origem, sem CORS e sem `/docs` público.
+
+```bash
+cp .env.prod.example .env.prod   # troque todos os valores (openssl rand -hex 32)
+docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
+```
+
+- `DOMAIN` precisa apontar para o IP público da VPS antes de subir, para o Caddy
+  emitir o certificado.
+- As migrações rodam ao iniciar o backend. Não rode os scripts `seed_*.py` em produção.
+- Backup do banco: `docker compose -f docker-compose.prod.yml exec -T db pg_dump -U ecolixo -Fc ecolixo > backup.dump`.
+
 ## Usuários de teste
 
 | Tipo    | Nome             | Email              | Senha   |

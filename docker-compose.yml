@@ -21,6 +21,8 @@ services:
     build: ./backend
     container_name: ecolixo_backend
     env_file: ./backend/.env
+    # O volume de uploads do desenvolvimento já existe com dono root.
+    user: root
     environment:
       - PYTHONDONTWRITEBYTECODE=1
     ports:
@@ -55,8 +57,6 @@ services:
       - pnpm_store:/app/.pnpm-store
     depends_on:
       - backend
-    environment:
-      - VITE_API_URL=http://localhost:8000
 
 volumes:
   postgres_data:

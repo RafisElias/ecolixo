@@ -6,6 +6,7 @@
 /base.txt
 /Relatório*.txt
 /ShortPaper*.txt
+/CONTEXTO_CONVERSA_ECOLIXO.txt
 apresentacao_oral_tgi.md
 gerar_*.py
 # ─── Python ───
@@ -32,4 +33,5 @@ node_modules/
 Thumbs.db
 # ─── Docker ───
 .env
-# (manter .env.example versionado)
+.env.prod
+# (manter .env.example e .env.prod.example versionados)
