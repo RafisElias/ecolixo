@@ -1,10 +1,9 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Suspense, useActionState, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { apiErrorMessage } from "../api/errors";
 import MultiSelect from "../components/MultiSelect";
 import { useCategories } from "../hooks/useCategories";
-import { createPoint } from "../services/pointService";
+import { useCreatePoint } from "../hooks/usePoints";
 import type { NewReportState } from "../types";
 
 function CategorySelect({
@@ -30,14 +29,7 @@ export default function NewReport() {
   const [lat, setLat] = useState("");
   const [lng, setLng] = useState("");
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
-  const queryClient = useQueryClient();
-
-  const createMutation = useMutation({
-    mutationFn: createPoint,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["points"] });
-    },
-  });
+  const createMutation = useCreatePoint();
 
   const [locating, setLocating] = useState(false);
 

@@ -27,9 +27,12 @@ export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { data: notifications = [] } = useQuery<Notification[]>({
-    queryKey: ["notifications", location.pathname, user?.id],
+    queryKey: ["notifications", user?.id],
     queryFn: fetchNotifications,
     enabled: !!user,
+    // Atualiza periodicamente e ao voltar para a aba, sem refazer a busca a cada rota.
+    staleTime: 30_000,
+    refetchInterval: 60_000,
   });
   const unread = notifications.filter((n) => !n.read).length;
 

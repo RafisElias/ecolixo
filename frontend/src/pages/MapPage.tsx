@@ -1,4 +1,3 @@
-import { useSuspenseQuery } from "@tanstack/react-query";
 import L from "leaflet";
 import { memo, Suspense, useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
@@ -6,7 +5,8 @@ import "leaflet/dist/leaflet.css";
 import CollectionPointDetails from "../components/CollectionPointDetails";
 import ServiceCoverageLayer from "../components/ServiceCoverageLayer";
 import { useCategories } from "../hooks/useCategories";
-import { fetchHeatmap, fetchPoints } from "../services/pointService";
+import { useSuspensePoints } from "../hooks/usePoints";
+import { fetchHeatmap } from "../services/pointService";
 import type { DisposalPoint } from "../types";
 
 // ─── Leaflet icon fix ────────────────────────────────────────────
@@ -34,13 +34,7 @@ function coloredIcon(color: string) {
 
 // ─── Data fetching ───────────────────────────────────────────────
 function useFetchPoints(filters: Filters): DisposalPoint[] {
-  const { data } = useSuspenseQuery<DisposalPoint[]>({
-    queryKey: ["points", filters],
-    queryFn: () => fetchPoints(filters),
-    staleTime: 30_000,
-  });
-
-  return data;
+  return useSuspensePoints(filters).data;
 }
 
 // ─── HeatmapLayer ────────────────────────────────────────────────

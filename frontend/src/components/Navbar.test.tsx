@@ -30,6 +30,8 @@ import { useAuth } from "../contexts/AuthContext";
 describe("Navbar", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Cada teste começa sem dados em cache de testes anteriores.
+    queryClient.clear();
   });
 
   it("exibe o nome do usuário", () => {

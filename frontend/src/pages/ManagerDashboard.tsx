@@ -1,10 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { apiErrorMessage } from "../api/errors";
 import { useAuth } from "../contexts/AuthContext";
-import { fetchPoints, reviewPoint, updatePointStatus } from "../services/pointService";
-import type { DisposalPoint, ReviewStatus } from "../types";
+import { usePointMutations, usePoints } from "../hooks/usePoints";
+import type { ReviewStatus } from "../types";
 
 const STATUS_LABELS: Record<string, string> = {
   pending: "Pendente",
@@ -19,37 +18,36 @@ const REVIEW_LABELS: Record<ReviewStatus, string> = {
 };
 
 export default function ManagerDashboard() {
-  const queryClient = useQueryClient();
   const { user } = useAuth();
   const [filter, setFilter] = useState("");
   const [reviewFilter, setReviewFilter] = useState("");
 
-  const { data: points = [], isLoading } = useQuery<DisposalPoint[]>({
-    queryKey: ["points", filter, reviewFilter],
-    queryFn: () =>
-      fetchPoints({
-        ...(filter ? { status: filter } : {}),
-        ...(reviewFilter ? { review_status: reviewFilter } : {}),
-      }),
+  const { data: points = [], isLoading } = usePoints({
+    ...(filter ? { status: filter } : {}),
+    ...(reviewFilter ? { review_status: reviewFilter } : {}),
   });
+  const { review, status } = usePointMutations();
 
-  const reviewMutation = useMutation({
-    mutationFn: ({ id, review }: { id: number; review: ReviewStatus }) => reviewPoint(id, review),
-    onSuccess: (_, { review }) => {
-      toast.success(review === "approved" ? "Contribuição aprovada" : "Revisão registrada");
-      queryClient.invalidateQueries({ queryKey: ["points"] });
-    },
-    onError: (err) => toast.error(apiErrorMessage(err, "Erro ao revisar registro")),
-  });
+  const reviewPoint = (id: number, reviewStatus: ReviewStatus) =>
+    review.mutate(
+      { id, review: reviewStatus },
+      {
+        onSuccess: () =>
+          toast.success(
+            reviewStatus === "approved" ? "Contribuição aprovada" : "Revisão registrada",
+          ),
+        onError: (err) => toast.error(apiErrorMessage(err, "Erro ao revisar registro")),
+      },
+    );
 
-  const statusMutation = useMutation({
-    mutationFn: ({ id, status }: { id: number; status: string }) => updatePointStatus(id, status),
-    onSuccess: () => {
-      toast.success("Status atualizado");
-      queryClient.invalidateQueries({ queryKey: ["points"] });
-    },
-    onError: () => toast.error("Erro ao atualizar status"),
-  });
+  const updateStatus = (id: number, newStatus: string) =>
+    status.mutate(
+      { id, status: newStatus },
+      {
+        onSuccess: () => toast.success("Status atualizado"),
+        onError: () => toast.error("Erro ao atualizar status"),
+      },
+    );
 
   const counts = {
     total: points.length,
@@ -186,7 +184,7 @@ export default function ManagerDashboard() {
                   <td style={{ padding: "10px 14px" }}>
                     <select
                       value={p.status}
-                      onChange={(e) => statusMutation.mutate({ id: p.id, status: e.target.value })}
+                      onChange={(e) => updateStatus(p.id, e.target.value)}
                       style={{
                         padding: "4px 8px",
                         borderRadius: 6,
@@ -213,9 +211,9 @@ export default function ManagerDashboard() {
                           <button
                             type="button"
                             className="btn btn-sm btn-primary"
-                            disabled={reviewMutation.isPending}
+                            disabled={review.isPending}
                             aria-label={`Aprovar registro #${p.id}`}
-                            onClick={() => reviewMutation.mutate({ id: p.id, review: "approved" })}
+                            onClick={() => reviewPoint(p.id, "approved")}
                           >
                             Aprovar
                           </button>
@@ -224,9 +222,9 @@ export default function ManagerDashboard() {
                           <button
                             type="button"
                             className="btn btn-sm btn-danger"
-                            disabled={reviewMutation.isPending}
+                            disabled={review.isPending}
                             aria-label={`Rejeitar registro #${p.id}`}
-                            onClick={() => reviewMutation.mutate({ id: p.id, review: "rejected" })}
+                            onClick={() => reviewPoint(p.id, "rejected")}
                           >
                             Rejeitar
                           </button>
