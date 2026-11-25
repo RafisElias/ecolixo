@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import NewReport from "./NewReport";
 
 vi.mock("../contexts/AuthContext", () => ({
@@ -50,9 +50,7 @@ describe("NewReport", () => {
       </Wrapper>,
     );
     expect(
-      screen.getByPlaceholderText(
-        /Ex: monitor quebrado, pilhas usadas, celular antigo/,
-      ),
+      screen.getByPlaceholderText(/Ex: monitor quebrado, pilhas usadas, celular antigo/),
     ).toBeDefined();
   });
 

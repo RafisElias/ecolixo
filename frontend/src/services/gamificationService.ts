@@ -14,7 +14,10 @@ export async function fetchMissions(): Promise<Mission[]> {
 export async function completeMission({
   key,
   answers,
-}: { key: string; answers: Record<string, string> }): Promise<MissionResult> {
+}: {
+  key: string;
+  answers: Record<string, string>;
+}): Promise<MissionResult> {
   const { data } = await api.post<MissionResult>(
     `/gamification/missions/${encodeURIComponent(key)}/complete`,
     { answers },

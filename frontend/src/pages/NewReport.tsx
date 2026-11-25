@@ -28,7 +28,6 @@ export default function NewReport() {
   const [selectedCats, setSelectedCats] = useState<number[]>([]);
   const [lat, setLat] = useState("");
   const [lng, setLng] = useState("");
-  const [photo, setPhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
@@ -82,7 +81,6 @@ export default function NewReport() {
         setLat("");
         setLng("");
         setSelectedCats([]);
-        setPhoto(null);
         setPhotoPreview(null);
         formRef.current?.reset();
         return { success: true, error: null };
@@ -100,7 +98,6 @@ export default function NewReport() {
   const handlePhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setPhoto(file);
     setPhotoPreview(URL.createObjectURL(file));
   };
 

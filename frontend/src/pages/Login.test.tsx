@@ -73,26 +73,28 @@ describe("Login", () => {
     expect(screen.getByLabelText("Senha")).toHaveValue("senha-errada");
   });
 
-  it.each(["email-invalido", "ana@", "ana@dominio", "@teste.com"])(
-    "mostra erro para %s sem chamar a API",
-    async (email) => {
-      const user = userEvent.setup();
-      render(
-        <MemoryRouter>
-          <Login />
-        </MemoryRouter>,
-      );
-      await user.type(screen.getByLabelText("Email"), email);
-      await user.type(screen.getByLabelText("Senha"), "123456");
-      await user.click(screen.getByRole("button", { name: "Entrar" }));
-      expect(
-        await screen.findByText("Informe um e-mail válido, como nome@exemplo.com."),
-      ).toBeInTheDocument();
-      expect(screen.getByLabelText("Email")).toHaveAttribute("aria-invalid", "true");
-      expect(screen.getByLabelText("Email")).toHaveFocus();
-      expect(mockLogin).not.toHaveBeenCalled();
-    },
-  );
+  it.each([
+    "email-invalido",
+    "ana@",
+    "ana@dominio",
+    "@teste.com",
+  ])("mostra erro para %s sem chamar a API", async (email) => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <Login />
+      </MemoryRouter>,
+    );
+    await user.type(screen.getByLabelText("Email"), email);
+    await user.type(screen.getByLabelText("Senha"), "123456");
+    await user.click(screen.getByRole("button", { name: "Entrar" }));
+    expect(
+      await screen.findByText("Informe um e-mail válido, como nome@exemplo.com."),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Email")).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByLabelText("Email")).toHaveFocus();
+    expect(mockLogin).not.toHaveBeenCalled();
+  });
 
   it("mostra erros dos campos vazios", async () => {
     const user = userEvent.setup();

@@ -1,4 +1,4 @@
-import { Suspense, lazy } from "react";
+import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Navbar from "./components/Navbar";
@@ -18,7 +18,10 @@ const Journey = lazy(() => import("./pages/Journey"));
 function PrivateRoute({
   children,
   managerOnly = false,
-}: { children: React.ReactNode; managerOnly?: boolean }) {
+}: {
+  children: React.ReactNode;
+  managerOnly?: boolean;
+}) {
   const { user } = useAuth();
   if (!user) return <Navigate to="/login" replace />;
   if (managerOnly && user.type !== "manager") return <Navigate to="/map" replace />;

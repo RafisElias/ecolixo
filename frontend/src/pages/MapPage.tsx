@@ -1,6 +1,6 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import L from "leaflet";
-import { Suspense, memo, useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { memo, Suspense, useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import CollectionPointDetails from "../components/CollectionPointDetails";
@@ -44,11 +44,7 @@ function useFetchPoints(filters: Filters): DisposalPoint[] {
 }
 
 // ─── HeatmapLayer ────────────────────────────────────────────────
-const HeatmapLayer = memo(function HeatmapLayer({
-  active,
-}: {
-  active: boolean;
-}) {
+const HeatmapLayer = memo(function HeatmapLayer({ active }: { active: boolean }) {
   const map = useMap();
   const layerRef = useRef<L.HeatLayer | null>(null);
 

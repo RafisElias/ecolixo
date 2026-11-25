@@ -66,19 +66,21 @@ describe("API client", () => {
     expect(window.location.href).toBe("/login");
   });
 
-  it.each(["/auth/login", "/auth/register", "/api/auth/login", "http://localhost/api/auth/login"])(
-    "propaga 401 de %s sem redirecionar ou limpar sessão",
-    async (url) => {
-      localStorage.setItem("token", "existente");
-      localStorage.setItem("user", "{}");
-      await expect(api.post(url, {}, { adapter: rejectWith(401) })).rejects.toBeInstanceOf(
-        AxiosError,
-      );
-      expect(window.location.href).toBe("http://localhost/login");
-      expect(localStorage.getItem("token")).toBe("existente");
-      expect(localStorage.getItem("user")).toBe("{}");
-    },
-  );
+  it.each([
+    "/auth/login",
+    "/auth/register",
+    "/api/auth/login",
+    "http://localhost/api/auth/login",
+  ])("propaga 401 de %s sem redirecionar ou limpar sessão", async (url) => {
+    localStorage.setItem("token", "existente");
+    localStorage.setItem("user", "{}");
+    await expect(api.post(url, {}, { adapter: rejectWith(401) })).rejects.toBeInstanceOf(
+      AxiosError,
+    );
+    expect(window.location.href).toBe("http://localhost/login");
+    expect(localStorage.getItem("token")).toBe("existente");
+    expect(localStorage.getItem("user")).toBe("{}");
+  });
 
   it("não redireciona em outros erros", async () => {
     await expect(api.get("/points", { adapter: rejectWith(500) })).rejects.toBeInstanceOf(

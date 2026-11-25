@@ -10,7 +10,10 @@ const PRICING = { free: "Gratuita", paid: "Cobrada", on_request: "Sob consulta" 
 export default function PickupServiceForm({
   service,
   onClose,
-}: { service: PickupService | null; onClose: () => void }) {
+}: {
+  service: PickupService | null;
+  onClose: () => void;
+}) {
   const categories = useCategories();
   const { save } = usePickupServiceMutations();
   const [coverage, setCoverage] = useState<CoverageDraft>({

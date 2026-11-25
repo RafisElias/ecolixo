@@ -1,6 +1,6 @@
-import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
+import { describe, expect, it, vi } from "vitest";
 import Home from "./Home";
 
 vi.mock("../contexts/AuthContext", () => ({
@@ -23,9 +23,7 @@ describe("Home", () => {
         <Home />
       </MemoryRouter>,
     );
-    expect(
-      screen.getByText(/Mapeamento colaborativo de pontos de coleta/),
-    ).toBeDefined();
+    expect(screen.getByText(/Mapeamento colaborativo de pontos de coleta/)).toBeDefined();
   });
 
   it("renderiza a seção 'O problema do lixo eletrônico'", () => {
@@ -73,8 +71,6 @@ describe("Home", () => {
         <Home />
       </MemoryRouter>,
     );
-    expect(
-      screen.getByText(/Mapeamento colaborativo de resíduos eletrônicos/),
-    ).toBeDefined();
+    expect(screen.getByText(/Mapeamento colaborativo de resíduos eletrônicos/)).toBeDefined();
   });
 });
