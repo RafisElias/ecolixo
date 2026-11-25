@@ -1,19 +1,18 @@
 import json
-from typing import Sequence
+from collections.abc import Sequence
 
-from fastapi import HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, cast
-from sqlalchemy.orm import selectinload
-from geoalchemy2.functions import ST_MakePoint, ST_SetSRID, ST_DWithin
-
+from fastapi import HTTPException
+from geoalchemy2.functions import ST_DWithin, ST_MakePoint, ST_SetSRID
 from geoalchemy2.types import Geometry as GeoGeometry
+from sqlalchemy import cast, func, select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.models.disposal_point import DisposalPoint, PointStatus, ReviewStatus, disposal_point_categories
 from app.models.notification import Notification
-from app.models.waste_category import WasteCategory
 from app.models.user import User, UserType
-from app.schemas.disposal_point import DisposalPointOut, CategoryOut, DisposalPointStatusUpdate
+from app.models.waste_category import WasteCategory
+from app.schemas.disposal_point import CategoryOut, DisposalPointOut, DisposalPointStatusUpdate
 from app.schemas.gamification import ReviewUpdate
 from app.services import gamification_service
 from app.services.file_service import save_photo, validate_photo

@@ -11,9 +11,9 @@ from pathlib import Path
 # Adiciona o diretório raiz ao path para importar os módulos do app
 sys.path.insert(0, str(Path(__file__).parent))
 
-from app.database import AsyncSessionLocal, engine, Base
-from app.models.user import User, UserType
 from app.auth.jwt import hash_password
+from app.database import AsyncSessionLocal
+from app.models.user import User, UserType
 
 TEST_USERS = [
     # --- Cidadãos ---

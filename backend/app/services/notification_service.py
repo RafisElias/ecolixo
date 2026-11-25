@@ -1,9 +1,8 @@
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.notification import Notification
 from app.models.user import User
-from app.schemas.notification import NotificationOut
 
 
 async def list_notifications(db: AsyncSession, current_user: User) -> list[Notification]:
@@ -19,7 +18,7 @@ async def list_notifications(db: AsyncSession, current_user: User) -> list[Notif
 async def mark_all_read(db: AsyncSession, current_user: User) -> None:
     await db.execute(
         update(Notification)
-        .where(Notification.user_id == current_user.id, Notification.read == False)
+        .where(Notification.user_id == current_user.id, Notification.read.is_(False))
         .values(read=True)
     )
     await db.commit()

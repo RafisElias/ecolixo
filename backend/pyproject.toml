@@ -1,0 +1,12 @@
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+extend-exclude = ["uploads"]
+# Fora do bind mount, para não criar arquivos de root no host.
+cache-dir = "/tmp/ruff-cache"
+
+[tool.ruff.lint]
+# Erros reais, imports, bugbear e modernizações seguras.
+select = ["E4", "E7", "E9", "F", "I", "B", "UP"]
+# FastAPI usa Depends/Query/File como valores padrão por design.
+ignore = ["B008"]

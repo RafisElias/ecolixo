@@ -1,13 +1,13 @@
 import hmac
 
 from fastapi import HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.auth.jwt import create_access_token, hash_password, verify_password
 from app.config import settings
 from app.models.user import User, UserType
-from app.schemas.user import UserCreate, LoginRequest, UserOut, Token
-from app.auth.jwt import hash_password, verify_password, create_access_token
+from app.schemas.user import LoginRequest, Token, UserCreate, UserOut
 
 
 async def register_user(body: UserCreate, db: AsyncSession) -> User:

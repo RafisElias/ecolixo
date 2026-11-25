@@ -1,6 +1,7 @@
-from sqlalchemy import BigInteger, Text, Date, Integer, DateTime, ForeignKey, func
+from sqlalchemy import BigInteger, Date, DateTime, ForeignKey, Integer, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.database import Base
 
 

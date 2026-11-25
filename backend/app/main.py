@@ -1,10 +1,11 @@
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-import os
 
 from app.config import settings
-from app.routers import auth, disposal_points, categories, reports, notifications, pickup_services, gamification
+from app.routers import auth, categories, disposal_points, gamification, notifications, pickup_services, reports
 
 app = FastAPI(
     title="EcoLixo API",

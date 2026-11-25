@@ -7,16 +7,16 @@ Uso:
 import asyncio
 import sys
 from pathlib import Path
-from datetime import datetime, timezone
 
 sys.path.insert(0, str(Path(__file__).parent))
+
+from geoalchemy2.functions import ST_MakePoint, ST_SetSRID
+from sqlalchemy import select
 
 from app.database import AsyncSessionLocal
 from app.models.disposal_point import DisposalPoint, PointStatus
 from app.models.user import User
 from app.models.waste_category import WasteCategory
-from geoalchemy2.functions import ST_MakePoint, ST_SetSRID
-from sqlalchemy import select
 
 # Pontos de coleta em São Paulo (lat, lng, descrição, status)
 SAMPLE_POINTS = [

@@ -1,6 +1,5 @@
-from fastapi import HTTPException, status
+from sqlalchemy import Date, cast, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, cast, Date
 
 from app.models.disposal_point import DisposalPoint, disposal_point_categories
 from app.models.report import Report

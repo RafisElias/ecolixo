@@ -1,14 +1,13 @@
-from typing import Annotated
 
-from fastapi import APIRouter, Depends, UploadFile, File, Form, Query, status
+from fastapi import APIRouter, Depends, File, Form, Query, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.auth.jwt import get_current_user, require_manager
 from app.database import get_db
 from app.models.disposal_point import PointStatus, ReviewStatus
 from app.models.user import User
 from app.schemas.disposal_point import DisposalPointOut, DisposalPointStatusUpdate
 from app.schemas.gamification import ReviewUpdate
-from app.auth.jwt import get_current_user, require_manager
 from app.services import point_service
 
 router = APIRouter(prefix="/points", tags=["disposal-points"])

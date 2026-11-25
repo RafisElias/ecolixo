@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.auth.jwt import require_manager
 from app.database import get_db
 from app.models.user import User
 from app.schemas.report import ReportCreate, ReportOut
-from app.auth.jwt import require_manager
 from app.services import report_service
 
 router = APIRouter(prefix="/reports", tags=["reports"])

@@ -1,5 +1,7 @@
 from datetime import datetime
+
 from pydantic import BaseModel
+
 from app.models.disposal_point import PointStatus, ReviewStatus
 
 

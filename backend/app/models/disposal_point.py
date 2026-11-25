@@ -1,7 +1,9 @@
 import enum
-from sqlalchemy import BigInteger, CheckConstraint, String, Text, Enum, DateTime, ForeignKey, Table, Column, func
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from geoalchemy2 import Geography
+from sqlalchemy import BigInteger, CheckConstraint, Column, DateTime, Enum, ForeignKey, String, Table, Text, func
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.database import Base
 
 
