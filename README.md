@@ -18,7 +18,7 @@ cd ecolixo
 # 2. Copie o .env
 cp .env.example backend/.env
 
-# 3. Suba os containers
+# 3. Suba os containers (o backend aplica as migrações ao iniciar)
 docker compose up --build -d
 
 # 4. Popule o banco com dados de teste
@@ -27,6 +27,54 @@ docker compose exec backend python seed_points.py
 ```
 
 Acesse [http://localhost:5173](http://localhost:5173).
+
+## Serviços de retirada (MVP)
+
+Após entrar, acesse **Serviços** no menu ou `/services`.
+
+- Cadastro de prestadores (pessoa ou empresa), contato, região de atendimento,
+  materiais aceitos e retirada gratuita, cobrada ou sob consulta.
+- Consulta e filtro por material; edição e remoção somente pelo autor.
+- Edição em `/services/:id/edit`, com opção de exibir uma referência pública
+  aproximada e raio de atendimento entre 1 e 100 km. Selecione no mapa ou informe
+  latitude/longitude; não informe endereço residencial.
+- No mapa, ative **Mostrar serviços de retirada**. Círculos azuis e ícone de caminhão
+  representam serviços, não pontos de coleta. O filtro de material vale para ambos;
+  status e mapa de calor são exclusivos dos pontos de coleta.
+- Sem referência geográfica, o anúncio permanece apenas no catálogo. Desativar a
+  opção e salvar remove a referência. Exemplos fictícios não recebem coordenadas
+  automaticamente. A área é aproximada: confirme disponibilidade com o prestador.
+- O contato é visível aos usuários autenticados. Os anúncios não são certificados
+  pelo EcoLixo. Disponibilidade e custos são combinados diretamente com o prestador.
+- Não inclui agendamento, pagamento ou avaliações.
+
+## Minha jornada (gamificação)
+
+Cidadãos acessam **Minha jornada** (`/journey`): missões educativas (10 pontos cada,
+uma vez, com respostas validadas no servidor), conquistas e histórico de pontos.
+Um ponto de coleta rende 30 pontos somente depois de **aprovado** por um gestor no
+painel; rejeitar ou voltar para revisão revoga a pontuação, que continua no histórico.
+Os pontos reconhecem participação: não medem quantidade reciclada nem certificam locais.
+Registros rejeitados não aparecem no mapa dos cidadãos.
+
+## Banco de dados e migrações
+
+O esquema é versionado com Alembic (`backend/migrations/`). O backend executa
+`alembic upgrade head` ao iniciar, então bancos novos e existentes são atualizados
+sem apagar dados nem volumes. As migrações são idempotentes e também adotam bancos
+criados com os antigos scripts `database/*.sql`.
+
+```bash
+docker compose exec backend alembic current           # versão aplicada
+docker compose exec backend alembic upgrade head      # aplicar manualmente
+docker compose exec backend alembic revision -m "..." # nova migração
+```
+
+Testes HTTP com PostgreSQL (dados de teste revertidos por transação):
+
+```bash
+docker compose exec -T backend python -m unittest discover -s tests -v
+```
 
 ## Usuários de teste
 
@@ -45,6 +93,7 @@ Acesse [http://localhost:5173](http://localhost:5173).
 ```bash
 docker compose exec backend python seed_users.py    # Cria 7 usuários
 docker compose exec backend python seed_points.py   # Cria 22 pontos em SP
+docker compose exec backend python seed_services.py # Cria 6 serviços fictícios (sem duplicar)
 ```
 
 ## Estrutura
@@ -59,8 +108,11 @@ ecolixo/
 │   │   ├── routers/      # Controllers (thin)
 │   │   ├── auth/         # JWT
 │   │   └── ...
+│   ├── migrations/       # Alembic
+│   ├── tests/            # Integração HTTP + PostgreSQL
 │   ├── seed_users.py
-│   └── seed_points.py
+│   ├── seed_points.py
+│   └── seed_services.py
 ├── frontend/
 │   ├── src/
 │   │   ├── pages/        # Views
@@ -86,14 +138,14 @@ docker compose logs frontend -f
 docker compose exec frontend sh
 
 # Testes
-docker compose exec frontend sh -c "cd /app && npx vitest run"
+docker compose exec -T frontend pnpm exec vitest run
 
 # Cobertura
-docker compose exec frontend sh -c "cd /app && npx vitest run --coverage"
+docker compose exec -T frontend pnpm test:coverage
 
 # TypeScript
-docker compose exec frontend sh -c "cd /app && npx tsc --noEmit"
+docker compose exec -T frontend pnpm exec tsc --noEmit
 
 # Lint
-docker compose exec frontend sh -c "cd /app && npx biome check src/"
+docker compose exec -T frontend pnpm exec biome check src/
 ```

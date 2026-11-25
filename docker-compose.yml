@@ -9,11 +9,8 @@ services:
     ports:
       - "5433:5432"
     volumes:
+      # O esquema é criado e atualizado pelo Alembic ao iniciar o backend.
       - postgres_data:/var/lib/postgresql/data
-      - ./database/init.sql:/docker-entrypoint-initdb.d/01_init.sql
-      - ./database/seed.sql:/docker-entrypoint-initdb.d/02_seed.sql
-      - ./database/pickup_services.sql:/docker-entrypoint-initdb.d/03_pickup_services.sql
-      - ./database/gamification.sql:/docker-entrypoint-initdb.d/04_gamification.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ecolixo"]
       interval: 10s
@@ -34,7 +31,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    command: sh -c "alembic upgrade head && exec uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
 
   frontend:
     build: ./frontend
