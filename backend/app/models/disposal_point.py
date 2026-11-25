@@ -1,5 +1,5 @@
 import enum
-from sqlalchemy import BigInteger, Text, Enum, DateTime, ForeignKey, Table, Column, func
+from sqlalchemy import BigInteger, CheckConstraint, String, Text, Enum, DateTime, ForeignKey, Table, Column, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from geoalchemy2 import Geography
 from app.database import Base
@@ -9,6 +9,13 @@ class PointStatus(str, enum.Enum):
     pending = "pending"
     under_review = "under_review"
     resolved = "resolved"
+
+
+class ReviewStatus(str, enum.Enum):
+    """Revisão da informação cadastrada; não certifica o local."""
+    pending = "pending"
+    approved = "approved"
+    rejected = "rejected"
 
 
 # Tabela de junção muitos-para-muitos
@@ -22,6 +29,9 @@ disposal_point_categories = Table(
 
 class DisposalPoint(Base):
     __tablename__ = "disposal_points"
+    __table_args__ = (
+        CheckConstraint("review_status IN ('pending', 'approved', 'rejected')", name="disposal_point_review_status_valid"),
+    )
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
@@ -30,12 +40,15 @@ class DisposalPoint(Base):
     status: Mapped[PointStatus] = mapped_column(
         Enum(PointStatus, name="point_status"), default=PointStatus.pending
     )
+    review_status: Mapped[str] = mapped_column(String(20), nullable=False, default=ReviewStatus.pending.value, server_default="pending")
+    reviewed_by: Mapped[int | None] = mapped_column(BigInteger, ForeignKey("users.id", ondelete="SET NULL"))
+    reviewed_at: Mapped[DateTime | None] = mapped_column(DateTime(timezone=True))
     location = mapped_column(Geography(geometry_type="POINT", srid=4326), nullable=False)
     created_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[DateTime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
 
-    user = relationship("User", back_populates="disposal_points")
+    user = relationship("User", back_populates="disposal_points", foreign_keys=[user_id])
     categories = relationship("WasteCategory", secondary=disposal_point_categories, back_populates="disposal_points")
     notifications = relationship("Notification", back_populates="point", cascade="all, delete-orphan")

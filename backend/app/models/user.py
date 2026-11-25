@@ -19,6 +19,8 @@ class User(Base):
     type: Mapped[UserType] = mapped_column(Enum(UserType, name="user_type"), default=UserType.citizen)
     created_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
-    disposal_points = relationship("DisposalPoint", back_populates="user", cascade="all, delete-orphan")
+    disposal_points = relationship(
+        "DisposalPoint", back_populates="user", cascade="all, delete-orphan", foreign_keys="DisposalPoint.user_id"
+    )
     notifications = relationship("Notification", back_populates="user", cascade="all, delete-orphan")
     reports = relationship("Report", back_populates="manager")

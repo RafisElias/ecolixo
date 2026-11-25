@@ -13,6 +13,7 @@ const MapPage = lazy(() => import("./pages/MapPage"));
 const NewReport = lazy(() => import("./pages/NewReport"));
 const ManagerDashboard = lazy(() => import("./pages/ManagerDashboard"));
 const Analytics = lazy(() => import("./pages/Analytics"));
+const Journey = lazy(() => import("./pages/Journey"));
 
 function PrivateRoute({
   children,
@@ -74,6 +75,14 @@ export default function App() {
               element={
                 <PrivateRoute>
                   <NewReport />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/journey"
+              element={
+                <PrivateRoute>
+                  <Journey />
                 </PrivateRoute>
               }
             />

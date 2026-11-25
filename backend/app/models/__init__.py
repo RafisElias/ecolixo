@@ -4,3 +4,4 @@ from app.models.disposal_point import DisposalPoint
 from app.models.notification import Notification
 from app.models.report import Report
 from app.models.pickup_service import PickupService
+from app.models.gamification import MissionCompletion, ScoreEvent

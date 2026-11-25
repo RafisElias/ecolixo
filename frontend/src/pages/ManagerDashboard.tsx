@@ -1,8 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { fetchPoints, updatePointStatus } from "../services/pointService";
-import type { DisposalPoint } from "../types";
+import { useAuth } from "../contexts/AuthContext";
+import { fetchPoints, reviewPoint, updatePointStatus } from "../services/pointService";
+import type { DisposalPoint, ReviewStatus } from "../types";
 
 const STATUS_LABELS: Record<string, string> = {
   pending: "Pendente",
@@ -10,13 +11,39 @@ const STATUS_LABELS: Record<string, string> = {
   resolved: "Resolvido",
 };
 
+const REVIEW_LABELS: Record<ReviewStatus, string> = {
+  pending: "Aguardando revisão",
+  approved: "Aprovado",
+  rejected: "Rejeitado",
+};
+
+function errorDetail(err: unknown) {
+  const detail = (err as { response?: { data?: { detail?: unknown } } }).response?.data?.detail;
+  return typeof detail === "string" ? detail : "Erro ao revisar registro";
+}
+
 export default function ManagerDashboard() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const [filter, setFilter] = useState("");
+  const [reviewFilter, setReviewFilter] = useState("");
 
   const { data: points = [], isLoading } = useQuery<DisposalPoint[]>({
-    queryKey: ["points", filter],
-    queryFn: () => fetchPoints(filter ? { status: filter } : {}),
+    queryKey: ["points", filter, reviewFilter],
+    queryFn: () =>
+      fetchPoints({
+        ...(filter ? { status: filter } : {}),
+        ...(reviewFilter ? { review_status: reviewFilter } : {}),
+      }),
+  });
+
+  const reviewMutation = useMutation({
+    mutationFn: ({ id, review }: { id: number; review: ReviewStatus }) => reviewPoint(id, review),
+    onSuccess: (_, { review }) => {
+      toast.success(review === "approved" ? "Contribuição aprovada" : "Revisão registrada");
+      queryClient.invalidateQueries({ queryKey: ["points"] });
+    },
+    onError: (err) => toast.error(errorDetail(err)),
   });
 
   const statusMutation = useMutation({
@@ -60,14 +87,37 @@ export default function ManagerDashboard() {
         ))}
       </div>
 
-      <div style={{ marginBottom: 16, display: "flex", gap: 8 }}>
+      <div
+        role="group"
+        aria-label="Filtrar por status"
+        style={{ marginBottom: 10, display: "flex", gap: 8, flexWrap: "wrap" }}
+      >
         {["", "pending", "under_review", "resolved"].map((s) => (
           <button
             key={s}
+            type="button"
+            aria-pressed={filter === s}
             className={`btn btn-sm ${filter === s ? "btn-primary" : "btn-outline"}`}
             onClick={() => setFilter(s)}
           >
             {s ? STATUS_LABELS[s] : "Todos"}
+          </button>
+        ))}
+      </div>
+      <div
+        role="group"
+        aria-label="Filtrar por revisão"
+        style={{ marginBottom: 16, display: "flex", gap: 8, flexWrap: "wrap" }}
+      >
+        {(["", "pending", "approved", "rejected"] as const).map((s) => (
+          <button
+            key={s}
+            type="button"
+            aria-pressed={reviewFilter === s}
+            className={`btn btn-sm ${reviewFilter === s ? "btn-primary" : "btn-outline"}`}
+            onClick={() => setReviewFilter(s)}
+          >
+            {s ? REVIEW_LABELS[s] : "Todas as revisões"}
           </button>
         ))}
       </div>
@@ -79,7 +129,7 @@ export default function ManagerDashboard() {
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
             <thead>
               <tr style={{ background: "#f9fafb" }}>
-                {["ID", "Categoria", "Status", "Descrição", "Data", "Ação"].map((h) => (
+                {["ID", "Categoria", "Status", "Descrição", "Data", "Ação", "Revisão"].map((h) => (
                   <th
                     key={h}
                     style={{
@@ -153,12 +203,47 @@ export default function ManagerDashboard() {
                       <option value="resolved">Resolvido</option>
                     </select>
                   </td>
+                  <td style={{ padding: "10px 14px", whiteSpace: "nowrap" }}>
+                    <span className={`badge badge-${p.review_status}`}>
+                      {REVIEW_LABELS[p.review_status]}
+                    </span>
+                    {p.user_id === user?.id ? (
+                      <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>
+                        Seu registro: outro gestor revisa
+                      </div>
+                    ) : (
+                      <div style={{ display: "flex", gap: 6, marginTop: 6 }}>
+                        {p.review_status !== "approved" && (
+                          <button
+                            type="button"
+                            className="btn btn-sm btn-primary"
+                            disabled={reviewMutation.isPending}
+                            aria-label={`Aprovar registro #${p.id}`}
+                            onClick={() => reviewMutation.mutate({ id: p.id, review: "approved" })}
+                          >
+                            Aprovar
+                          </button>
+                        )}
+                        {p.review_status !== "rejected" && (
+                          <button
+                            type="button"
+                            className="btn btn-sm btn-danger"
+                            disabled={reviewMutation.isPending}
+                            aria-label={`Rejeitar registro #${p.id}`}
+                            onClick={() => reviewMutation.mutate({ id: p.id, review: "rejected" })}
+                          >
+                            Rejeitar
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </td>
                 </tr>
               ))}
               {points.length === 0 && (
                 <tr>
                   <td
-                    colSpan={6}
+                    colSpan={7}
                     style={{
                       padding: 24,
                       textAlign: "center",

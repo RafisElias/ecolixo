@@ -1,6 +1,6 @@
 from datetime import datetime
 from pydantic import BaseModel, field_validator
-from app.models.disposal_point import PointStatus
+from app.models.disposal_point import PointStatus, ReviewStatus
 
 
 class DisposalPointCreate(BaseModel):
@@ -43,6 +43,8 @@ class DisposalPointOut(BaseModel):
     description: str | None
     photo_url: str | None
     status: PointStatus
+    review_status: ReviewStatus = ReviewStatus.pending
+    reviewed_at: datetime | None = None
     latitude: float
     longitude: float
     created_at: datetime

@@ -1,0 +1,40 @@
+.journey-page { max-width: 960px; margin: 0 auto; width: 100%; }
+.journey-page section { margin-bottom: 28px; }
+.journey-page h3 { font-size: 17px; margin-bottom: 12px; }
+.journey-intro { max-width: 800px; margin: 0 auto 24px; line-height: 1.7; color: var(--text-muted); text-align: center; }
+.journey-muted { color: var(--text-muted); }
+
+.journey-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr)); gap: 14px; }
+.journey-summary .card { text-align: center; display: flex; flex-direction: column; gap: 4px; }
+.journey-summary strong { font-size: 30px; font-weight: 800; color: var(--green); }
+.journey-summary span { font-size: 12px; color: var(--text-muted); }
+
+.journey-list, .journey-achievements, .journey-history { list-style: none; padding: 0; margin: 0; }
+.journey-list { display: flex; flex-direction: column; gap: 14px; }
+
+.journey-mission-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+.journey-mission-head p, .journey-achievement p { color: var(--text-muted); font-size: 13px; margin-top: 4px; line-height: 1.5; }
+
+.journey-quiz { margin-top: 16px; line-height: 1.6; }
+.journey-quiz > p { margin-bottom: 12px; }
+.journey-quiz fieldset { border: 1.5px solid var(--border); border-radius: var(--radius); padding: 12px 16px; margin-bottom: 14px; min-width: 0; }
+.journey-quiz fieldset[aria-invalid="true"] { border-color: var(--danger); }
+.journey-quiz legend { font-weight: 600; padding: 0 4px; }
+.journey-quiz label { display: flex; align-items: center; gap: 8px; padding: 4px 0; cursor: pointer; }
+.journey-hint { color: var(--danger); font-size: 13px; margin-top: 8px; }
+.journey-ok { color: var(--green); font-weight: 600; margin-top: 8px; }
+
+.journey-achievements { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 14px; }
+.journey-achievement { display: flex; gap: 12px; opacity: 0.75; }
+.journey-achievement.unlocked { opacity: 1; border: 2px solid var(--green); }
+.journey-achievement h4 { font-size: 14px; }
+.journey-achievement progress { width: 100%; margin-top: 8px; accent-color: var(--green); }
+.journey-achievement small { font-size: 12px; color: var(--text-muted); }
+.journey-medal { font-size: 26px; }
+
+.journey-history li { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+.journey-history li:last-child { border-bottom: 0; }
+.journey-history li.revoked { color: var(--text-muted); }
+.journey-history-meta { display: flex; gap: 14px; color: var(--text-muted); }
+.journey-history-meta strong { color: var(--green); min-width: 36px; text-align: right; }
+.journey-history li.revoked strong { color: var(--text-muted); }

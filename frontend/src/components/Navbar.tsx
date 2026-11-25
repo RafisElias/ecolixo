@@ -62,6 +62,7 @@ export default function Navbar() {
       <NavLink to="/map" label="Mapa" current={location.pathname} />
       <NavLink to="/services" label="Serviços" current={location.pathname} />
       {!isManager && <NavLink to="/new-report" label="Registrar" current={location.pathname} />}
+      {!isManager && <NavLink to="/journey" label="Minha jornada" current={location.pathname} />}
       {isManager && <NavLink to="/dashboard" label="Painel" current={location.pathname} />}
       {isManager && <NavLink to="/analytics" label="Relatórios" current={location.pathname} />}
 

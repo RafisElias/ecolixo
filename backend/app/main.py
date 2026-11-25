@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 import os
 
 from app.config import settings
-from app.routers import auth, disposal_points, categories, reports, notifications, pickup_services
+from app.routers import auth, disposal_points, categories, reports, notifications, pickup_services, gamification
 
 app = FastAPI(
     title="EcoLixo API",
@@ -29,6 +29,7 @@ app.include_router(categories.router)
 app.include_router(reports.router)
 app.include_router(notifications.router)
 app.include_router(pickup_services.router)
+app.include_router(gamification.router)
 
 
 @app.get("/health")

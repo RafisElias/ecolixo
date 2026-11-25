@@ -20,11 +20,15 @@ export interface DisposalPoint {
   description: string | null;
   photo_url: string | null;
   status: "pending" | "under_review" | "resolved";
+  review_status: ReviewStatus;
+  reviewed_at: string | null;
   latitude: number;
   longitude: number;
   created_at: string;
   updated_at: string;
 }
+
+export type ReviewStatus = "pending" | "approved" | "rejected";
 
 export interface ReportData {
   by_status: Record<string, number>;
@@ -69,6 +73,61 @@ export interface PickupService extends Omit<PickupServiceInput, "category_ids"> 
   categories: Category[];
   created_at: string;
   updated_at: string;
+}
+
+export interface MissionOption {
+  id: string;
+  text: string;
+}
+
+export interface MissionQuestion {
+  id: string;
+  prompt: string;
+  options: MissionOption[];
+}
+
+export interface Mission {
+  key: string;
+  title: string;
+  summary: string;
+  content: string[];
+  questions: MissionQuestion[];
+  points: number;
+  completed: boolean;
+}
+
+export interface MissionResult {
+  passed: boolean;
+  already_completed: boolean;
+  points_awarded: number;
+  incorrect_question_ids: string[];
+}
+
+export interface Achievement {
+  key: string;
+  title: string;
+  description: string;
+  unlocked: boolean;
+  progress: number;
+  goal: number;
+}
+
+export interface ScoreEvent {
+  id: number;
+  reason: "mission_completed" | "contribution_approved";
+  description: string;
+  points: number;
+  created_at: string;
+  revoked_at: string | null;
+}
+
+export interface Journey {
+  balance: number;
+  missions_completed: number;
+  missions_total: number;
+  contributions: Record<ReviewStatus, number>;
+  achievements: Achievement[];
+  history: ScoreEvent[];
 }
 
 // ---- Auth context ----
