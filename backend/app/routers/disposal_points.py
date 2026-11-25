@@ -21,12 +21,20 @@ async def list_points(
     lat: float | None = Query(None, ge=-90, le=90),
     lon: float | None = Query(None, ge=-180, le=180),
     radius_km: float = Query(10.0, gt=0, le=500),
+    # Área visível do mapa (todos os quatro ou nenhum).
+    min_lat: float | None = Query(None, ge=-90, le=90),
+    min_lon: float | None = Query(None, ge=-180, le=180),
+    max_lat: float | None = Query(None, ge=-90, le=90),
+    max_lon: float | None = Query(None, ge=-180, le=180),
+    limit: int = Query(point_service.MAX_POINTS, ge=1, le=point_service.MAX_POINTS),
+    offset: int = Query(0, ge=0),
     db: AsyncSession = Depends(get_db),
     viewer: User = Depends(get_current_user),
 ):
     return await point_service.list_points(
         db, status_filter=status, review_status=review_status, category_id=category_id,
         lat=lat, lon=lon, radius_km=radius_km, viewer=viewer,
+        bbox=point_service.parse_bbox(min_lat, min_lon, max_lat, max_lon), limit=limit, offset=offset,
     )
 
 

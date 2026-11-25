@@ -30,6 +30,22 @@ REVIEW_MESSAGES = {
 }
 
 
+MAX_POINTS = 2000
+
+
+def parse_bbox(
+    min_lat: float | None, min_lon: float | None, max_lat: float | None, max_lon: float | None
+) -> tuple[float, float, float, float] | None:
+    values = (min_lat, min_lon, max_lat, max_lon)
+    if all(v is None for v in values):
+        return None
+    if any(v is None for v in values):
+        raise HTTPException(status_code=422, detail="Informe min_lat, min_lon, max_lat e max_lon juntos")
+    if min_lat > max_lat or min_lon > max_lon:
+        raise HTTPException(status_code=422, detail="A área informada é inválida")
+    return min_lat, min_lon, max_lat, max_lon
+
+
 def _is_manager(user: User | None) -> bool:
     return user is not None and user.type == UserType.manager
 
@@ -87,6 +103,9 @@ async def list_points(
     lon: float | None = None,
     radius_km: float = 10.0,
     viewer: User | None = None,
+    bbox: tuple[float, float, float, float] | None = None,
+    limit: int = MAX_POINTS,
+    offset: int = 0,
 ) -> list[DisposalPointOut]:
     loc = cast(DisposalPoint.location, GeoGeometry)
     q = select(
@@ -99,6 +118,9 @@ async def list_points(
         q = q.where(DisposalPoint.status == status_filter)
     if review_status:
         q = q.where(DisposalPoint.review_status == review_status.value)
+    if bbox is not None:
+        min_lat, min_lon, max_lat, max_lon = bbox
+        q = q.where(func.ST_Intersects(loc, func.ST_MakeEnvelope(min_lon, min_lat, max_lon, max_lat, 4326)))
     if not _is_manager(viewer):
         # Registros rejeitados pela revisão não aparecem no mapa público.
         q = q.where(DisposalPoint.review_status != ReviewStatus.rejected.value)
@@ -114,7 +136,9 @@ async def list_points(
         point_geog = ST_SetSRID(ST_MakePoint(lon, lat), 4326)
         q = q.where(ST_DWithin(DisposalPoint.location, point_geog, radius_km * 1000))
 
-    result = await db.execute(q.order_by(DisposalPoint.created_at.desc()))
+    result = await db.execute(
+        q.order_by(DisposalPoint.created_at.desc(), DisposalPoint.id.desc()).limit(limit).offset(offset)
+    )
     rows = result.all()
     return [_to_out(row[0], row.lat, row.lon) for row in rows]
 

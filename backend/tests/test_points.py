@@ -111,3 +111,20 @@ class PointTests(IntegrationTestCase):
         self.assertIn(report["id"], [r["id"] for r in listed])
         self.current_user = self.citizen
         self.assertEqual((await self.client.post("/reports", json=body)).status_code, 403)
+
+    async def test_bbox_and_pagination(self):
+        inside = await self.add_point(self.citizen)  # (-23.55, -46.63)
+        params = {"min_lat": -24, "min_lon": -47, "max_lat": -23, "max_lon": -46}
+        ids = [p["id"] for p in (await self.client.get("/points", params=params)).json()]
+        self.assertIn(inside, ids)
+        far = {"min_lat": 10, "min_lon": 10, "max_lat": 11, "max_lon": 11}
+        ids = [p["id"] for p in (await self.client.get("/points", params=far)).json()]
+        self.assertNotIn(inside, ids)
+        self.assertEqual((await self.client.get("/points", params={"min_lat": 1})).status_code, 422)
+        self.assertEqual((await self.client.get("/points", params={**params, "min_lat": 0})).status_code, 422)
+        second = await self.add_point(self.citizen)
+        page = (await self.client.get("/points", params={**params, "limit": 1})).json()
+        self.assertEqual([p["id"] for p in page], [second])
+        page = (await self.client.get("/points", params={**params, "limit": 1, "offset": 1})).json()
+        self.assertEqual([p["id"] for p in page], [inside])
+        self.assertEqual((await self.client.get("/points", params={"limit": 0})).status_code, 422)
