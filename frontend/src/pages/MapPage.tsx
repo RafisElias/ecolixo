@@ -2,6 +2,9 @@ import L from "leaflet";
 import { memo, Suspense, useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+import iconUrl from "leaflet/dist/images/marker-icon.png";
+import iconRetinaUrl from "leaflet/dist/images/marker-icon-2x.png";
+import shadowUrl from "leaflet/dist/images/marker-shadow.png";
 import CollectionPointDetails from "../components/CollectionPointDetails";
 import ServiceCoverageLayer from "../components/ServiceCoverageLayer";
 import { useCategories } from "../hooks/useCategories";
@@ -11,11 +14,8 @@ import type { DisposalPoint } from "../types";
 
 // ─── Leaflet icon fix ────────────────────────────────────────────
 (L.Icon.Default.prototype as unknown as Record<string, unknown>)._getIconUrl = undefined;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-});
+// Ícones servidos pelo próprio site (o build copia do pacote leaflet).
+L.Icon.Default.mergeOptions({ iconRetinaUrl, iconUrl, shadowUrl });
 
 // ─── Constantes ──────────────────────────────────────────────────
 interface Filters {
