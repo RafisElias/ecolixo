@@ -12,6 +12,7 @@ from app.database import engine, get_db
 from app.main import app
 from app.models.user import User, UserType
 from app.models.waste_category import WasteCategory
+from app.services.rate_limit import SERVICES_PER_HOUR
 
 
 class PickupServiceTests(unittest.IsolatedAsyncioTestCase):
@@ -49,6 +50,11 @@ class PickupServiceTests(unittest.IsolatedAsyncioTestCase):
         await self.connection.close()
         # Evita reutilizar conexões de outro event loop do unittest.
         await engine.dispose()
+
+    async def test_service_creation_is_rate_limited(self):
+        for _ in range(SERVICES_PER_HOUR):
+            self.assertEqual((await self.client.post("/pickup-services", json=self.body)).status_code, 201)
+        self.assertEqual((await self.client.post("/pickup-services", json=self.body)).status_code, 429)
 
     async def test_crud_and_filter(self):
         response = await self.client.post("/pickup-services", json=self.body)

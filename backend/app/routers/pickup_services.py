@@ -6,6 +6,7 @@ from app.database import get_db
 from app.models.user import User
 from app.schemas.pickup_service import PickupServiceCreate, PickupServiceOut
 from app.services import pickup_service
+from app.services.rate_limit import enforce_service_limit
 
 router = APIRouter(prefix="/pickup-services", tags=["pickup-services"])
 
@@ -34,6 +35,7 @@ async def create_service(
     db: AsyncSession = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
+    await enforce_service_limit(db, user.id)
     return await pickup_service.save_service(db, user.id, body)
 
 

@@ -10,6 +10,8 @@ from app.models.user import User, UserType
 from app.schemas.user import LoginRequest, Token, UserCreate, UserOut
 from app.services.login_throttle import login_throttle
 
+_DUMMY_HASH = hash_password("senha-ficticia-para-igualar-o-tempo")
+
 
 async def register_user(body: UserCreate, db: AsyncSession) -> User:
     """Registra um novo usuário com validações de senha e código de gestor."""
@@ -51,7 +53,10 @@ async def login_user(body: LoginRequest, db: AsyncSession, client_ip: str = "unk
         )
     result = await db.execute(select(User).where(User.email == body.email))
     user = result.scalar_one_or_none()
-    if not user or not verify_password(body.password, user.password):
+    # Sem usuário, compara com um hash fictício: o tempo de resposta não revela
+    # quais e-mails estão cadastrados.
+    password_ok = verify_password(body.password, user.password if user else _DUMMY_HASH)
+    if not user or not password_ok:
         login_throttle.failure(body.email, client_ip)
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="E-mail ou senha incorretos")
     login_throttle.success(body.email, client_ip)

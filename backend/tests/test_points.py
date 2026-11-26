@@ -139,3 +139,14 @@ class PointTests(IntegrationTestCase):
         page = (await self.client.get("/points", params={**params, "limit": 1, "offset": 1})).json()
         self.assertEqual([p["id"] for p in page], [inside])
         self.assertEqual((await self.client.get("/points", params={"limit": 0})).status_code, 422)
+
+    async def test_point_creation_is_rate_limited_per_user(self):
+        from app.services.rate_limit import POINTS_PER_HOUR
+
+        for _ in range(POINTS_PER_HOUR):
+            self.assertEqual((await self.client.post("/points", data=self.form())).status_code, 201)
+        blocked = await self.client.post("/points", data=self.form())
+        self.assertEqual(blocked.status_code, 429)
+        self.assertIn("Retry-After", blocked.headers)
+        self.current_user = self.manager
+        self.assertEqual((await self.client.post("/points", data=self.form())).status_code, 201)

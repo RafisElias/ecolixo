@@ -14,6 +14,7 @@ from app.main import app
 from app.models.disposal_point import DisposalPoint
 from app.models.user import User, UserType
 from app.models.waste_category import WasteCategory
+from app.services.rate_limit import registration_limit
 
 
 class IntegrationTestCase(unittest.IsolatedAsyncioTestCase):
@@ -34,6 +35,7 @@ class IntegrationTestCase(unittest.IsolatedAsyncioTestCase):
         self.db.add_all([self.citizen, self.manager, self.category])
         await self.db.flush()
         self.current_user = self.citizen
+        registration_limit.reset()
 
         # Uploads de teste nunca vão para o volume real.
         self.upload_dir = tempfile.TemporaryDirectory()

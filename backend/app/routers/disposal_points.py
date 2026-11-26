@@ -8,6 +8,7 @@ from app.models.user import User
 from app.schemas.disposal_point import DisposalPointOut, DisposalPointStatusUpdate
 from app.schemas.gamification import ReviewUpdate
 from app.services import point_service
+from app.services.rate_limit import enforce_point_limit
 
 router = APIRouter(prefix="/points", tags=["disposal-points"])
 
@@ -55,6 +56,7 @@ async def create_point(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    await enforce_point_limit(db, current_user.id)
     return await point_service.create_point(
         db,
         current_user,

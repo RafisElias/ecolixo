@@ -1,5 +1,6 @@
 from app.config import settings
 from app.services.login_throttle import MAX_FAILURES, login_throttle
+from app.services.rate_limit import registration_limit
 from tests.base import IntegrationTestCase
 
 
@@ -101,3 +102,29 @@ class AuthTests(IntegrationTestCase):
         self.assertEqual(
             (await self.client.post("/auth/login", json={"email": email, "password": "errada1"})).status_code, 401
         )
+
+    async def test_registration_is_rate_limited_per_ip(self):
+        for i in range(registration_limit.limit):
+            ok = await self.client.post("/auth/register", json=self.body(email=f"r{i}{self.suffix}@example.com"))
+            self.assertEqual(ok.status_code, 201, ok.text)
+        # Tentativas recusadas não contam; a próxima conta nova é bloqueada.
+        blocked = await self.client.post("/auth/register", json=self.body(email=f"extra{self.suffix}@example.com"))
+        self.assertEqual(blocked.status_code, 429)
+
+    async def test_failed_registration_does_not_count(self):
+        await self.client.post("/auth/register", json=self.body())
+        for _ in range(registration_limit.limit + 1):
+            dup = await self.client.post("/auth/register", json=self.body())
+            self.assertEqual(dup.status_code, 400)
+
+    async def test_unknown_email_still_checks_a_password_hash(self):
+        from unittest import mock
+
+        from app.services import auth_service
+
+        with mock.patch.object(auth_service, "verify_password", wraps=auth_service.verify_password) as spy:
+            response = await self.client.post(
+                "/auth/login", json={"email": "ninguem@example.com", "password": "x12345"}
+            )
+        self.assertEqual(response.status_code, 401)
+        spy.assert_called_once()

@@ -1,5 +1,6 @@
 import { useActionState, useState } from "react";
 import toast from "react-hot-toast";
+import { apiErrorMessage } from "../api/errors";
 import { useCategories } from "../hooks/useCategories";
 import { usePickupServiceMutations } from "../hooks/usePickupServices";
 import type { PickupService, PickupServiceInput } from "../types";
@@ -57,8 +58,11 @@ export default function PickupServiceForm({
       toast.success(service ? "Serviço atualizado!" : "Serviço cadastrado!");
       onClose();
       return null;
-    } catch {
-      return "Não foi possível salvar o serviço. Confira os dados e tente novamente.";
+    } catch (err) {
+      return apiErrorMessage(
+        err,
+        "Não foi possível salvar o serviço. Confira os dados e tente novamente.",
+      );
     }
   }, null);
 
