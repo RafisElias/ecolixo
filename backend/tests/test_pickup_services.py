@@ -1,4 +1,5 @@
 """Integração HTTP + PostgreSQL. Cada teste usa uma transação revertida ao final."""
+
 import unittest
 from types import SimpleNamespace
 from uuid import uuid4
@@ -32,9 +33,12 @@ class PickupServiceTests(unittest.IsolatedAsyncioTestCase):
         app.dependency_overrides[get_current_user] = lambda: self.current_user
         self.client = AsyncClient(transport=ASGITransport(app=app), base_url="http://test")
         self.body = {
-            "name": "Reciclagem de teste", "provider_type": "company",
-            "contact": "teste@example.com", "service_area": "São Paulo",
-            "pricing": "free", "category_ids": [self.category.id],
+            "name": "Reciclagem de teste",
+            "provider_type": "company",
+            "contact": "teste@example.com",
+            "service_area": "São Paulo",
+            "pricing": "free",
+            "category_ids": [self.category.id],
         }
 
     async def asyncTearDown(self):
@@ -60,7 +64,9 @@ class PickupServiceTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn(service_id, [item["id"] for item in listing.json()])
         listing = await self.client.get("/pickup-services", params={"category_id": 9223372036854775807})
         self.assertEqual(listing.json(), [])
-        updated = await self.client.put(f"/pickup-services/{service_id}", json={**self.body, "name": "Nome atualizado", "pricing": "paid"})
+        updated = await self.client.put(
+            f"/pickup-services/{service_id}", json={**self.body, "name": "Nome atualizado", "pricing": "paid"}
+        )
         self.assertEqual(updated.status_code, 200, updated.text)
         self.assertEqual(updated.json()["name"], "Nome atualizado")
         self.assertEqual((await self.client.delete(f"/pickup-services/{service_id}")).status_code, 204)
@@ -92,9 +98,13 @@ class PickupServiceTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_invalid_input(self):
         for changes in [
-            {"category_ids": []}, {"category_ids": [9223372036854775807]},
-            {"name": "  "}, {"contact": ""}, {"provider_type": "invalid"},
-            {"pricing": "invalid"}, {"user_id": -1},
+            {"category_ids": []},
+            {"category_ids": [9223372036854775807]},
+            {"name": "  "},
+            {"contact": ""},
+            {"provider_type": "invalid"},
+            {"pricing": "invalid"},
+            {"user_id": -1},
             {"reference_latitude": -23.55},
             {"reference_latitude": 91, "reference_longitude": 0, "radius_km": 5},
             {"reference_latitude": 0, "reference_longitude": -181, "radius_km": 5},
@@ -107,6 +117,12 @@ class PickupServiceTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_authentication_required(self):
         del app.dependency_overrides[get_current_user]
-        for method, path in [("GET", "/pickup-services"), ("GET", "/pickup-services/1"), ("POST", "/pickup-services"), ("PUT", "/pickup-services/1"), ("DELETE", "/pickup-services/1")]:
+        for method, path in [
+            ("GET", "/pickup-services"),
+            ("GET", "/pickup-services/1"),
+            ("POST", "/pickup-services"),
+            ("PUT", "/pickup-services/1"),
+            ("DELETE", "/pickup-services/1"),
+        ]:
             response = await self.client.request(method, path, json=self.body if method in ("POST", "PUT") else None)
             self.assertIn(response.status_code, (401, 403))

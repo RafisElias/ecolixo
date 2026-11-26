@@ -5,6 +5,7 @@ Equivale ao antigo database/gamification.sql; idempotente.
 Revision ID: 0002_gamification
 Revises: 0001_baseline
 """
+
 from alembic import op
 
 revision = "0002_gamification"

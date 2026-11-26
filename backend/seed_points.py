@@ -21,36 +21,32 @@ from app.models.waste_category import WasteCategory
 # Pontos de coleta em São Paulo (lat, lng, descrição, status)
 SAMPLE_POINTS = [
     # --- Zona Sul ---
-    ("Av. Paulista, 1000",       -23.5614, -46.6556, "Smartphone quebrado",              "pending"),
-    ("Av. Brigadeiro Faria Lima, 2000", -23.5869, -46.6843, "Monitor LCD antigo",         "pending"),
-    ("Rua Augusta, 500",         -23.5558, -46.6594, "Notebook velho",                   "under_review"),
-    ("Av. Rebouças, 3000",       -23.5657, -46.6711, "Geladeira pequena",                "resolved"),
-    ("Rua Oscar Freire, 900",    -23.5602, -46.6678, "Baterias de celular",              "pending"),
-
+    ("Av. Paulista, 1000", -23.5614, -46.6556, "Smartphone quebrado", "pending"),
+    ("Av. Brigadeiro Faria Lima, 2000", -23.5869, -46.6843, "Monitor LCD antigo", "pending"),
+    ("Rua Augusta, 500", -23.5558, -46.6594, "Notebook velho", "under_review"),
+    ("Av. Rebouças, 3000", -23.5657, -46.6711, "Geladeira pequena", "resolved"),
+    ("Rua Oscar Freire, 900", -23.5602, -46.6678, "Baterias de celular", "pending"),
     # --- Zona Oeste ---
-    ("Rua Teodoro Sampaio, 1500",-23.5517, -46.6883, "TV 32 polegadas",                  "under_review"),
-    ("Av. Heitor Penteado, 500", -23.5389, -46.7061, "Micro-ondas",                      "resolved"),
-    ("Largo da Batata, 100",     -23.5540, -46.6934, "Cabos e carregadores",             "pending"),
-    ("Rua dos Pinheiros, 800",   -23.5587, -46.6789, "Tablet com tela quebrada",         "pending"),
-    ("Av. Faria Lima, 3500",     -23.5914, -46.6889, "Roteador e modem antigos",         "under_review"),
-
+    ("Rua Teodoro Sampaio, 1500", -23.5517, -46.6883, "TV 32 polegadas", "under_review"),
+    ("Av. Heitor Penteado, 500", -23.5389, -46.7061, "Micro-ondas", "resolved"),
+    ("Largo da Batata, 100", -23.5540, -46.6934, "Cabos e carregadores", "pending"),
+    ("Rua dos Pinheiros, 800", -23.5587, -46.6789, "Tablet com tela quebrada", "pending"),
+    ("Av. Faria Lima, 3500", -23.5914, -46.6889, "Roteador e modem antigos", "under_review"),
     # --- Centro ---
-    ("Praça da Sé, 1",           -23.5505, -46.6333, "Teclado e mouse",                  "resolved"),
-    ("Rua 25 de Março, 500",     -23.5456, -46.6344, "Bateria de notebook",              "pending"),
-    ("Av. São João, 700",        -23.5439, -46.6419, "Monitor CRT antigo",               "pending"),
-    ("Largo do Arouche, 100",    -23.5397, -46.6417, "Fones de ouvido estragados",       "under_review"),
-    ("Praça da República, 50",   -23.5456, -46.6431, "Ventilador queimado",              "pending"),
-
+    ("Praça da Sé, 1", -23.5505, -46.6333, "Teclado e mouse", "resolved"),
+    ("Rua 25 de Março, 500", -23.5456, -46.6344, "Bateria de notebook", "pending"),
+    ("Av. São João, 700", -23.5439, -46.6419, "Monitor CRT antigo", "pending"),
+    ("Largo do Arouche, 100", -23.5397, -46.6417, "Fones de ouvido estragados", "under_review"),
+    ("Praça da República, 50", -23.5456, -46.6431, "Ventilador queimado", "pending"),
     # --- Zona Norte ---
-    ("Av. Cruzeiro do Sul, 2000",-23.5144, -46.6231, "Impressora jato de tinta",         "resolved"),
-    ("Rua Voluntários da Pátria, 3000", -23.5192, -46.6192, "Monitor LED",               "pending"),
-    ("Av. Eng. Caetano Álvares, 5000", -23.4818, -46.6272, "Geladeira",                  "under_review"),
-
+    ("Av. Cruzeiro do Sul, 2000", -23.5144, -46.6231, "Impressora jato de tinta", "resolved"),
+    ("Rua Voluntários da Pátria, 3000", -23.5192, -46.6192, "Monitor LED", "pending"),
+    ("Av. Eng. Caetano Álvares, 5000", -23.4818, -46.6272, "Geladeira", "under_review"),
     # --- Zona Leste ---
-    ("Av. Radial Leste, 3000",   -23.5481, -46.5981, "CPU desktop antigo",              "pending"),
-    ("Rua do Oratório, 2000",    -23.5589, -46.5894, "Aparelho de som",                 "resolved"),
-    ("Av. Sapopemba, 8000",      -23.6019, -46.5725, "Notebook com tela quebrada",      "pending"),
-    ("Praça do Carmo, 100",      -23.5564, -46.6081, "Carregador de laptop",             "under_review"),
+    ("Av. Radial Leste, 3000", -23.5481, -46.5981, "CPU desktop antigo", "pending"),
+    ("Rua do Oratório, 2000", -23.5589, -46.5894, "Aparelho de som", "resolved"),
+    ("Av. Sapopemba, 8000", -23.6019, -46.5725, "Notebook com tela quebrada", "pending"),
+    ("Praça do Carmo, 100", -23.5564, -46.6081, "Carregador de laptop", "under_review"),
 ]
 
 

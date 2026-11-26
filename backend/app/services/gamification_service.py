@@ -5,6 +5,7 @@
   revogada (não apagada) se a aprovação for desfeita.
 - Saldo: soma dos eventos não revogados.
 """
+
 from fastapi import HTTPException
 from sqlalchemy import func, select, update
 from sqlalchemy.dialects.postgresql import insert
@@ -85,7 +86,8 @@ def _mission_out(mission: Mission, completed: bool) -> MissionOut:
         content=list(mission.content),
         questions=[
             QuestionOut(
-                id=q.id, prompt=q.prompt,
+                id=q.id,
+                prompt=q.prompt,
                 options=[OptionOut(id=o.id, text=o.text) for o in q.options],
             )
             for q in mission.questions
@@ -121,8 +123,10 @@ async def complete_mission(db: AsyncSession, user_id: int, mission_key: str, bod
     awarded = await _award(db, user_id, MISSION, mission.key, POINTS_MISSION)
     await db.commit()
     return MissionResult(
-        passed=True, already_completed=False,
-        points_awarded=POINTS_MISSION if awarded else 0, incorrect_question_ids=[],
+        passed=True,
+        already_completed=False,
+        points_awarded=POINTS_MISSION if awarded else 0,
+        incorrect_question_ids=[],
     )
 
 
@@ -135,16 +139,27 @@ def _describe(event: ScoreEvent) -> str:
 
 def _achievement(key: str, title: str, description: str, progress: int, goal: int) -> AchievementOut:
     return AchievementOut(
-        key=key, title=title, description=description,
-        unlocked=progress >= goal, progress=min(progress, goal), goal=goal,
+        key=key,
+        title=title,
+        description=description,
+        unlocked=progress >= goal,
+        progress=min(progress, goal),
+        goal=goal,
     )
 
 
 async def get_journey(db: AsyncSession, user_id: int) -> JourneyOut:
-    events = list((await db.execute(
-        select(ScoreEvent).where(ScoreEvent.user_id == user_id)
-        .order_by(ScoreEvent.created_at.desc(), ScoreEvent.id.desc())
-    )).scalars().all())
+    events = list(
+        (
+            await db.execute(
+                select(ScoreEvent)
+                .where(ScoreEvent.user_id == user_id)
+                .order_by(ScoreEvent.created_at.desc(), ScoreEvent.id.desc())
+            )
+        )
+        .scalars()
+        .all()
+    )
     active = [e for e in events if e.revoked_at is None]
     approved = sum(1 for e in active if e.reason == CONTRIBUTION)
 
@@ -164,15 +179,39 @@ async def get_journey(db: AsyncSession, user_id: int) -> JourneyOut:
         missions_total=total,
         contributions=counts,
         achievements=[
-            _achievement("primeiro-aprendizado", "Primeiro aprendizado", "Conclua sua primeira missão educativa.", len(done), 1),
-            _achievement("aprendiz-descarte-consciente", "Aprendiz do descarte consciente", "Conclua todas as missões educativas.", len(done), total),
-            _achievement("primeira-contribuicao", "Primeira contribuição", "Tenha um ponto de coleta aprovado pela gestão.", approved, 1),
-            _achievement("colaborador-do-mapa", "Colaborador do mapa", f"Tenha {MAP_COLLABORATOR_GOAL} pontos de coleta aprovados.", approved, MAP_COLLABORATOR_GOAL),
+            _achievement(
+                "primeiro-aprendizado", "Primeiro aprendizado", "Conclua sua primeira missão educativa.", len(done), 1
+            ),
+            _achievement(
+                "aprendiz-descarte-consciente",
+                "Aprendiz do descarte consciente",
+                "Conclua todas as missões educativas.",
+                len(done),
+                total,
+            ),
+            _achievement(
+                "primeira-contribuicao",
+                "Primeira contribuição",
+                "Tenha um ponto de coleta aprovado pela gestão.",
+                approved,
+                1,
+            ),
+            _achievement(
+                "colaborador-do-mapa",
+                "Colaborador do mapa",
+                f"Tenha {MAP_COLLABORATOR_GOAL} pontos de coleta aprovados.",
+                approved,
+                MAP_COLLABORATOR_GOAL,
+            ),
         ],
         history=[
             ScoreEventOut(
-                id=e.id, reason=e.reason, description=_describe(e),
-                points=e.points, created_at=e.created_at, revoked_at=e.revoked_at,
+                id=e.id,
+                reason=e.reason,
+                description=_describe(e),
+                points=e.points,
+                created_at=e.created_at,
+                revoked_at=e.revoked_at,
             )
             for e in events[:HISTORY_LIMIT]
         ],

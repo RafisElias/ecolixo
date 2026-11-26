@@ -24,8 +24,12 @@ class ScoreEvent(Base):
         CheckConstraint("reason IN ('mission_completed', 'contribution_approved')"),
         CheckConstraint("points > 0"),
         Index(
-            "score_events_active_once", "user_id", "reason", "source_key",
-            unique=True, postgresql_where=text("revoked_at IS NULL"),
+            "score_events_active_once",
+            "user_id",
+            "reason",
+            "source_key",
+            unique=True,
+            postgresql_where=text("revoked_at IS NULL"),
         ),
     )
 

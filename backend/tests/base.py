@@ -1,4 +1,5 @@
 """Base para testes de integração HTTP + PostgreSQL com transação revertida ao final."""
+
 import tempfile
 import unittest
 from uuid import uuid4
@@ -23,8 +24,12 @@ class IntegrationTestCase(unittest.IsolatedAsyncioTestCase):
         self.transaction = await self.connection.begin()
         self.db = AsyncSession(bind=self.connection, join_transaction_mode="create_savepoint", expire_on_commit=False)
         self.suffix = uuid4().hex
-        self.citizen = User(name="Cidadã", email=f"c{self.suffix}@example.com", password="not-used", type=UserType.citizen)
-        self.manager = User(name="Gestor", email=f"g{self.suffix}@example.com", password="not-used", type=UserType.manager)
+        self.citizen = User(
+            name="Cidadã", email=f"c{self.suffix}@example.com", password="not-used", type=UserType.citizen
+        )
+        self.manager = User(
+            name="Gestor", email=f"g{self.suffix}@example.com", password="not-used", type=UserType.manager
+        )
         self.category = WasteCategory(name=f"Teste {self.suffix}", map_color="#123456")
         self.db.add_all([self.citizen, self.manager, self.category])
         await self.db.flush()
@@ -54,10 +59,15 @@ class IntegrationTestCase(unittest.IsolatedAsyncioTestCase):
         # Evita reutilizar conexões de outro event loop do unittest.
         await engine.dispose()
 
-    async def add_point(self, owner: User, description: str | None = "Ponto de teste", review_status: str = "pending") -> int:
+    async def add_point(
+        self, owner: User, description: str | None = "Ponto de teste", review_status: str = "pending"
+    ) -> int:
         point = DisposalPoint(
-            user_id=owner.id, description=description, review_status=review_status,
-            location="SRID=4326;POINT(-46.63 -23.55)", categories=[self.category],
+            user_id=owner.id,
+            description=description,
+            review_status=review_status,
+            location="SRID=4326;POINT(-46.63 -23.55)",
+            categories=[self.category],
         )
         self.db.add(point)
         await self.db.flush()

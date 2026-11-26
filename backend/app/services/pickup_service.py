@@ -18,8 +18,7 @@ async def list_services(db: AsyncSession, category_id: int | None = None):
 
 async def get_service(db: AsyncSession, service_id: int):
     result = await db.execute(
-        select(PickupService).where(PickupService.id == service_id)
-        .options(selectinload(PickupService.categories))
+        select(PickupService).where(PickupService.id == service_id).options(selectinload(PickupService.categories))
     )
     service = result.scalar_one_or_none()
     if service is None:
@@ -43,7 +42,9 @@ async def _owned_service(db: AsyncSession, service_id: int, user_id: int):
 
 
 async def save_service(db: AsyncSession, user_id: int, body: PickupServiceCreate, service_id: int | None = None):
-    service = await _owned_service(db, service_id, user_id) if service_id is not None else PickupService(user_id=user_id)
+    service = (
+        await _owned_service(db, service_id, user_id) if service_id is not None else PickupService(user_id=user_id)
+    )
     categories = await _categories(db, body.category_ids)
     for key, value in body.model_dump(exclude={"category_ids"}).items():
         setattr(service, key, value)

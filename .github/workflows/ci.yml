@@ -38,6 +38,7 @@ jobs:
           cache-dependency-path: backend/requirements*.txt
       - run: pip install -r requirements-dev.txt
       - run: ruff check .
+      - run: ruff format --check .
       - run: alembic upgrade head
       - run: python -m unittest discover -s tests -v
 

@@ -9,7 +9,9 @@ class Notification(Base):
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    point_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("disposal_points.id", ondelete="CASCADE"), nullable=False)
+    point_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey("disposal_points.id", ondelete="CASCADE"), nullable=False
+    )
     message: Mapped[str] = mapped_column(Text, nullable=False)
     read: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), server_default=func.now())

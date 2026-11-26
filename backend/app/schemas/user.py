@@ -17,6 +17,7 @@ class UserCreate(BaseModel):
         if len(value.encode()) > 72:
             raise ValueError("A senha deve ter no máximo 72 bytes")
         return value
+
     type: UserType = UserType.citizen
     registration_code: str = ""
 

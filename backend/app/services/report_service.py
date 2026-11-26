@@ -7,9 +7,7 @@ from app.models.user import User
 from app.schemas.report import ReportCreate
 
 
-async def generate_report(
-    db: AsyncSession, manager: User, body: ReportCreate
-) -> Report:
+async def generate_report(db: AsyncSession, manager: User, body: ReportCreate) -> Report:
     base_q = select(DisposalPoint).where(
         cast(DisposalPoint.created_at, Date) >= body.period_start,
         cast(DisposalPoint.created_at, Date) <= body.period_end,
@@ -54,8 +52,6 @@ async def generate_report(
 
 async def list_reports(db: AsyncSession, manager: User) -> list[Report]:
     result = await db.execute(
-        select(Report)
-        .where(Report.manager_id == manager.id)
-        .order_by(Report.generated_at.desc())
+        select(Report).where(Report.manager_id == manager.id).order_by(Report.generated_at.desc())
     )
     return result.scalars().all()

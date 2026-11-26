@@ -8,6 +8,7 @@ adota um banco existente sem alterar dados.
 Revision ID: 0001_baseline
 Revises:
 """
+
 from alembic import op
 
 revision = "0001_baseline"

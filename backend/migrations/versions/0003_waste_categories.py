@@ -5,6 +5,7 @@ Equivale ao antigo database/seed.sql; não duplica categorias existentes.
 Revision ID: 0003_waste_categories
 Revises: 0002_gamification
 """
+
 from alembic import op
 
 revision = "0003_waste_categories"

@@ -4,6 +4,7 @@ Guardado em memória do processo: com vários workers cada um conta à parte, o 
 ainda limita força bruta a poucas tentativas por minuto. Para mais réplicas,
 trocar por um armazenamento compartilhado (ex.: Redis).
 """
+
 import time
 from collections import defaultdict, deque
 

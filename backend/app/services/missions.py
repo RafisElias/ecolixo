@@ -4,6 +4,7 @@ O gabarito fica somente no servidor. Ao mudar o conteúdo de uma missão de form
 relevante, crie uma nova chave (ex.: ``-v2``) em vez de editar a existente, para
 que as conclusões já registradas continuem se referindo ao conteúdo respondido.
 """
+
 from dataclasses import dataclass
 
 

@@ -14,7 +14,9 @@ class PointTests(IntegrationTestCase):
 
     async def test_create_point_with_photo(self):
         response = await self.client.post(
-            "/points", data=self.form(description="Monitor"), files={"photo": ("foto.png", PNG, "image/png")},
+            "/points",
+            data=self.form(description="Monitor"),
+            files={"photo": ("foto.png", PNG, "image/png")},
         )
         self.assertEqual(response.status_code, 201, response.text)
         body = response.json()
@@ -38,18 +40,23 @@ class PointTests(IntegrationTestCase):
 
     async def test_rejects_fake_image_without_saving(self):
         response = await self.client.post(
-            "/points", data=self.form(), files={"photo": ("foto.jpg", b"<?php echo 1; ?>", "image/jpeg")},
+            "/points",
+            data=self.form(),
+            files={"photo": ("foto.jpg", b"<?php echo 1; ?>", "image/jpeg")},
         )
         self.assertEqual(response.status_code, 415, response.text)
         response = await self.client.post(
-            "/points", data=self.form(), files={"photo": ("foto.gif", PNG, "image/gif")},
+            "/points",
+            data=self.form(),
+            files={"photo": ("foto.gif", PNG, "image/gif")},
         )
         self.assertEqual(response.status_code, 415, response.text)
         self.assertEqual(os.listdir(self.upload_dir.name), [])
 
     async def test_invalid_category_does_not_leave_orphan_photo(self):
         response = await self.client.post(
-            "/points", data=self.form(category_ids="[9223372036854775807]"),
+            "/points",
+            data=self.form(category_ids="[9223372036854775807]"),
             files={"photo": ("foto.png", PNG, "image/png")},
         )
         self.assertEqual(response.status_code, 422)
@@ -57,10 +64,13 @@ class PointTests(IntegrationTestCase):
 
     async def test_rejects_photo_over_size_limit(self):
         from app.config import settings
+
         original, settings.max_upload_mb = settings.max_upload_mb, 0
         try:
             response = await self.client.post(
-                "/points", data=self.form(), files={"photo": ("foto.png", PNG, "image/png")},
+                "/points",
+                data=self.form(),
+                files={"photo": ("foto.png", PNG, "image/png")},
             )
         finally:
             settings.max_upload_mb = original
@@ -84,7 +94,8 @@ class PointTests(IntegrationTestCase):
         self.assertEqual(response.json()["status"], "resolved")
         self.current_user = self.citizen
         self.assertEqual(
-            (await self.client.patch(f"/points/{point_id}/status", json={"status": "pending"})).status_code, 403,
+            (await self.client.patch(f"/points/{point_id}/status", json={"status": "pending"})).status_code,
+            403,
         )
         notifications = (await self.client.get("/notifications")).json()
         self.assertIn("Resolvido", notifications[0]["message"])

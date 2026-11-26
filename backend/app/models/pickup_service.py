@@ -18,7 +18,10 @@ class PickupService(Base):
     __table_args__ = (
         CheckConstraint("provider_type IN ('individual', 'company')"),
         CheckConstraint("pricing IN ('free', 'paid', 'on_request')"),
-        CheckConstraint("(reference_latitude IS NULL AND reference_longitude IS NULL AND radius_km IS NULL) OR (reference_latitude IS NOT NULL AND reference_longitude IS NOT NULL AND radius_km IS NOT NULL AND reference_latitude BETWEEN -90 AND 90 AND reference_longitude BETWEEN -180 AND 180 AND radius_km BETWEEN 1 AND 100)", name="pickup_service_coverage_valid"),
+        CheckConstraint(
+            "(reference_latitude IS NULL AND reference_longitude IS NULL AND radius_km IS NULL) OR (reference_latitude IS NOT NULL AND reference_longitude IS NOT NULL AND radius_km IS NOT NULL AND reference_latitude BETWEEN -90 AND 90 AND reference_longitude BETWEEN -180 AND 180 AND radius_km BETWEEN 1 AND 100)",
+            name="pickup_service_coverage_valid",
+        ),
     )
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
@@ -33,5 +36,7 @@ class PickupService(Base):
     reference_longitude: Mapped[float | None] = mapped_column(Float)
     radius_km: Mapped[float | None] = mapped_column(Float)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
     categories = relationship("WasteCategory", secondary=pickup_service_categories, lazy="selectin")

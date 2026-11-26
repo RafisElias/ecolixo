@@ -15,6 +15,7 @@ class PointStatus(str, enum.Enum):
 
 class ReviewStatus(str, enum.Enum):
     """Revisão da informação cadastrada; não certifica o local."""
+
     pending = "pending"
     approved = "approved"
     rejected = "rejected"
@@ -32,17 +33,19 @@ disposal_point_categories = Table(
 class DisposalPoint(Base):
     __tablename__ = "disposal_points"
     __table_args__ = (
-        CheckConstraint("review_status IN ('pending', 'approved', 'rejected')", name="disposal_point_review_status_valid"),
+        CheckConstraint(
+            "review_status IN ('pending', 'approved', 'rejected')", name="disposal_point_review_status_valid"
+        ),
     )
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     description: Mapped[str | None] = mapped_column(Text)
     photo_url: Mapped[str | None] = mapped_column(Text)
-    status: Mapped[PointStatus] = mapped_column(
-        Enum(PointStatus, name="point_status"), default=PointStatus.pending
+    status: Mapped[PointStatus] = mapped_column(Enum(PointStatus, name="point_status"), default=PointStatus.pending)
+    review_status: Mapped[str] = mapped_column(
+        String(20), nullable=False, default=ReviewStatus.pending.value, server_default="pending"
     )
-    review_status: Mapped[str] = mapped_column(String(20), nullable=False, default=ReviewStatus.pending.value, server_default="pending")
     reviewed_by: Mapped[int | None] = mapped_column(BigInteger, ForeignKey("users.id", ondelete="SET NULL"))
     reviewed_at: Mapped[DateTime | None] = mapped_column(DateTime(timezone=True))
     location = mapped_column(Geography(geometry_type="POINT", srid=4326), nullable=False)

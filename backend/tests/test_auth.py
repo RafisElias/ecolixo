@@ -12,8 +12,11 @@ class AuthTests(IntegrationTestCase):
 
     def body(self, **overrides) -> dict:
         data = {
-            "name": "Ana", "email": f"ana{self.suffix}@example.com",
-            "password": "segredo1", "password_confirm": "segredo1", "type": "citizen",
+            "name": "Ana",
+            "email": f"ana{self.suffix}@example.com",
+            "password": "segredo1",
+            "password_confirm": "segredo1",
+            "type": "citizen",
         }
         data.update(overrides)
         return data
@@ -40,9 +43,14 @@ class AuthTests(IntegrationTestCase):
         await self.client.post("/auth/register", json=self.body())
         duplicate = await self.client.post("/auth/register", json=self.body())
         self.assertEqual(duplicate.json()["detail"], "Este e-mail já está cadastrado")
-        mismatch = await self.client.post("/auth/register", json=self.body(email=f"x{self.suffix}@example.com", password_confirm="outra12"))
+        mismatch = await self.client.post(
+            "/auth/register", json=self.body(email=f"x{self.suffix}@example.com", password_confirm="outra12")
+        )
         self.assertEqual(mismatch.json()["detail"], "As senhas não coincidem")
-        short = await self.client.post("/auth/register", json=self.body(email=f"y{self.suffix}@example.com", password="123", password_confirm="123"))
+        short = await self.client.post(
+            "/auth/register",
+            json=self.body(email=f"y{self.suffix}@example.com", password="123", password_confirm="123"),
+        )
         self.assertEqual(short.status_code, 422)
 
     async def test_manager_registration_code(self):
@@ -52,13 +60,16 @@ class AuthTests(IntegrationTestCase):
             self.assertEqual(missing.status_code, 400)
             wrong = await self.client.post("/auth/register", json=self.body(type="manager", registration_code="errado"))
             self.assertEqual(wrong.json()["detail"], "Código de cadastro de gestor inválido")
-            ok = await self.client.post("/auth/register", json=self.body(type="manager", registration_code="codigo-certo"))
+            ok = await self.client.post(
+                "/auth/register", json=self.body(type="manager", registration_code="codigo-certo")
+            )
             self.assertEqual(ok.status_code, 201, ok.text)
             self.assertEqual(ok.json()["type"], "manager")
             # Sem código configurado no servidor, ninguém se cadastra como gestor.
             settings.gestor_registration_code = ""
             disabled = await self.client.post(
-                "/auth/register", json=self.body(email=f"z{self.suffix}@example.com", type="manager", registration_code="x"),
+                "/auth/register",
+                json=self.body(email=f"z{self.suffix}@example.com", type="manager", registration_code="x"),
             )
             self.assertEqual(disabled.status_code, 400)
         finally:
@@ -68,17 +79,25 @@ class AuthTests(IntegrationTestCase):
         await self.client.post("/auth/register", json=self.body())
         email = self.body()["email"]
         for _ in range(MAX_FAILURES):
-            self.assertEqual((await self.client.post("/auth/login", json={"email": email, "password": "errada1"})).status_code, 401)
+            self.assertEqual(
+                (await self.client.post("/auth/login", json={"email": email, "password": "errada1"})).status_code, 401
+            )
         blocked = await self.client.post("/auth/login", json={"email": email, "password": "segredo1"})
         self.assertEqual(blocked.status_code, 429)
         self.assertIn("Retry-After", blocked.headers)
         login_throttle.reset()
-        self.assertEqual((await self.client.post("/auth/login", json={"email": email, "password": "segredo1"})).status_code, 200)
+        self.assertEqual(
+            (await self.client.post("/auth/login", json={"email": email, "password": "segredo1"})).status_code, 200
+        )
 
     async def test_successful_login_clears_failures(self):
         await self.client.post("/auth/register", json=self.body())
         email = self.body()["email"]
         for _ in range(MAX_FAILURES - 1):
             await self.client.post("/auth/login", json={"email": email, "password": "errada1"})
-        self.assertEqual((await self.client.post("/auth/login", json={"email": email, "password": "segredo1"})).status_code, 200)
-        self.assertEqual((await self.client.post("/auth/login", json={"email": email, "password": "errada1"})).status_code, 401)
+        self.assertEqual(
+            (await self.client.post("/auth/login", json={"email": email, "password": "segredo1"})).status_code, 200
+        )
+        self.assertEqual(
+            (await self.client.post("/auth/login", json={"email": email, "password": "errada1"})).status_code, 401
+        )

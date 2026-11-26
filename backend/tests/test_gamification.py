@@ -1,4 +1,5 @@
 """Integração HTTP + PostgreSQL da gamificação. Cada teste usa uma transação revertida ao final."""
+
 import unittest
 from uuid import uuid4
 
@@ -75,10 +76,15 @@ class GamificationTests(unittest.IsolatedAsyncioTestCase):
         answers = {**CORRECT, MISSION.questions[0].id: "resposta-invalida"}
         response = await self.client.post(f"/gamification/missions/{MISSION.key}/complete", json={"answers": answers})
         self.assertEqual(response.status_code, 200, response.text)
-        self.assertEqual(response.json(), {
-            "passed": False, "already_completed": False, "points_awarded": 0,
-            "incorrect_question_ids": [MISSION.questions[0].id],
-        })
+        self.assertEqual(
+            response.json(),
+            {
+                "passed": False,
+                "already_completed": False,
+                "points_awarded": 0,
+                "incorrect_question_ids": [MISSION.questions[0].id],
+            },
+        )
         journey = await self._journey()
         self.assertEqual(journey["balance"], 0)
         self.assertEqual(journey["missions_completed"], 0)
@@ -88,9 +94,15 @@ class GamificationTests(unittest.IsolatedAsyncioTestCase):
         first = await self.client.post(url, json={"answers": CORRECT})
         self.assertEqual(first.json()["points_awarded"], 10)
         second = await self.client.post(url, json={"answers": CORRECT})
-        self.assertEqual(second.json(), {
-            "passed": True, "already_completed": True, "points_awarded": 0, "incorrect_question_ids": [],
-        })
+        self.assertEqual(
+            second.json(),
+            {
+                "passed": True,
+                "already_completed": True,
+                "points_awarded": 0,
+                "incorrect_question_ids": [],
+            },
+        )
         journey = await self._journey()
         self.assertEqual(journey["balance"], 10)
         self.assertEqual(len(journey["history"]), 1)
@@ -141,7 +153,9 @@ class GamificationTests(unittest.IsolatedAsyncioTestCase):
         response = await self._review(point_id, "approved")
         self.assertEqual(response.status_code, 200, response.text)
         self.assertEqual((await self._journey())["balance"], 0)
-        events = (await self.db.execute(select(ScoreEvent).where(ScoreEvent.user_id == self.citizen.id))).scalars().all()
+        events = (
+            (await self.db.execute(select(ScoreEvent).where(ScoreEvent.user_id == self.citizen.id))).scalars().all()
+        )
         self.assertEqual(events, [])
 
     async def test_only_other_managers_can_review(self):

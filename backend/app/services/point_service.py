@@ -87,9 +87,7 @@ def _to_out(point: DisposalPoint, lat: float, lon: float) -> DisposalPointOut:
 
 async def _fetch_coords(point: DisposalPoint, db: AsyncSession) -> tuple[float, float]:
     loc = cast(point.location, GeoGeometry)
-    result = await db.execute(
-        select(func.ST_Y(loc).label("lat"), func.ST_X(loc).label("lon"))
-    )
+    result = await db.execute(select(func.ST_Y(loc).label("lat"), func.ST_X(loc).label("lon")))
     row = result.one()
     return row.lat, row.lon
 
@@ -155,9 +153,7 @@ async def create_point(
     cat_ids = _parse_category_ids(category_ids)
     categories: Sequence[WasteCategory] = []
     if cat_ids:
-        result = await db.execute(
-            select(WasteCategory).where(WasteCategory.id.in_(cat_ids))
-        )
+        result = await db.execute(select(WasteCategory).where(WasteCategory.id.in_(cat_ids)))
         categories = result.scalars().all()
         if len(categories) != len(cat_ids):
             raise HTTPException(status_code=422, detail="Uma ou mais categorias são inválidas")
@@ -181,13 +177,9 @@ async def create_point(
     return _to_out(point, lat, lon)
 
 
-async def update_point_status(
-    db: AsyncSession, point_id: int, body: DisposalPointStatusUpdate
-) -> DisposalPointOut:
+async def update_point_status(db: AsyncSession, point_id: int, body: DisposalPointStatusUpdate) -> DisposalPointOut:
     result = await db.execute(
-        select(DisposalPoint)
-        .where(DisposalPoint.id == point_id)
-        .options(selectinload(DisposalPoint.categories))
+        select(DisposalPoint).where(DisposalPoint.id == point_id).options(selectinload(DisposalPoint.categories))
     )
     point = result.scalar_one_or_none()
     if not point:
@@ -210,9 +202,7 @@ async def update_point_status(
     return _to_out(point, lat, lon)
 
 
-async def review_point(
-    db: AsyncSession, point_id: int, reviewer: User, body: ReviewUpdate
-) -> DisposalPointOut:
+async def review_point(db: AsyncSession, point_id: int, reviewer: User, body: ReviewUpdate) -> DisposalPointOut:
     # Bloqueia a linha para serializar revisões concorrentes do mesmo ponto.
     result = await db.execute(
         select(DisposalPoint)
@@ -236,11 +226,13 @@ async def review_point(
 
     await gamification_service.sync_contribution_score(db, point)
     if changed:
-        db.add(Notification(
-            user_id=point.user_id,
-            point_id=point.id,
-            message=f"Seu registro #{point.id} {REVIEW_MESSAGES[new_status]}",
-        ))
+        db.add(
+            Notification(
+                user_id=point.user_id,
+                point_id=point.id,
+                message=f"Seu registro #{point.id} {REVIEW_MESSAGES[new_status]}",
+            )
+        )
     await db.commit()
     await db.refresh(point)
     await db.refresh(point, ["categories"])

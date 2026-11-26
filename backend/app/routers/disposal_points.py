@@ -1,4 +1,3 @@
-
 from fastapi import APIRouter, Depends, File, Form, Query, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -32,9 +31,17 @@ async def list_points(
     viewer: User = Depends(get_current_user),
 ):
     return await point_service.list_points(
-        db, status_filter=status, review_status=review_status, category_id=category_id,
-        lat=lat, lon=lon, radius_km=radius_km, viewer=viewer,
-        bbox=point_service.parse_bbox(min_lat, min_lon, max_lat, max_lon), limit=limit, offset=offset,
+        db,
+        status_filter=status,
+        review_status=review_status,
+        category_id=category_id,
+        lat=lat,
+        lon=lon,
+        radius_km=radius_km,
+        viewer=viewer,
+        bbox=point_service.parse_bbox(min_lat, min_lon, max_lat, max_lon),
+        limit=limit,
+        offset=offset,
     )
 
 
@@ -49,8 +56,13 @@ async def create_point(
     current_user: User = Depends(get_current_user),
 ):
     return await point_service.create_point(
-        db, current_user, latitude, longitude,
-        category_ids=category_ids, description=description, photo=photo,
+        db,
+        current_user,
+        latitude,
+        longitude,
+        category_ids=category_ids,
+        description=description,
+        photo=photo,
     )
 
 

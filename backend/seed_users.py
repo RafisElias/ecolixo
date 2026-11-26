@@ -17,15 +17,14 @@ from app.models.user import User, UserType
 
 TEST_USERS = [
     # --- Cidadãos ---
-    dict(name="Ana Silva",       email="ana@teste.com",      password="123456", type=UserType.citizen),
-    dict(name="Carlos Souza",    email="carlos@teste.com",   password="123456", type=UserType.citizen),
-    dict(name="Juliana Lima",    email="juliana@teste.com",  password="123456", type=UserType.citizen),
-    dict(name="Pedro Santos",    email="pedro@teste.com",    password="123456", type=UserType.citizen),
-    dict(name="Marina Oliveira", email="marina@teste.com",   password="123456", type=UserType.citizen),
-
+    dict(name="Ana Silva", email="ana@teste.com", password="123456", type=UserType.citizen),
+    dict(name="Carlos Souza", email="carlos@teste.com", password="123456", type=UserType.citizen),
+    dict(name="Juliana Lima", email="juliana@teste.com", password="123456", type=UserType.citizen),
+    dict(name="Pedro Santos", email="pedro@teste.com", password="123456", type=UserType.citizen),
+    dict(name="Marina Oliveira", email="marina@teste.com", password="123456", type=UserType.citizen),
     # --- Gestores Municipais ---
     dict(name="Roberto Almeida (Gestor)", email="roberto@teste.com", password="123456", type=UserType.manager),
-    dict(name="Fernanda Costa (Gestora)", email="fernanda@teste.com",password="123456", type=UserType.manager),
+    dict(name="Fernanda Costa (Gestora)", email="fernanda@teste.com", password="123456", type=UserType.manager),
 ]
 
 
@@ -38,6 +37,7 @@ async def seed():
 
         for data in TEST_USERS:
             from sqlalchemy import select
+
             result = await session.execute(select(User).where(User.email == data["email"]))
             existing = result.scalar_one_or_none()
 
