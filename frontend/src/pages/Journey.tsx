@@ -1,5 +1,5 @@
 import { type FormEvent, useId, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { useCompleteMission, useJourney, useMissions } from "../hooks/useGamification";
 import type { Achievement, Mission, MissionResult, ScoreEvent } from "../types";
 import "./Journey.css";

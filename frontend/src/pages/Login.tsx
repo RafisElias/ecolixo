@@ -1,6 +1,6 @@
 import { isAxiosError } from "axios";
 import { useActionState, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router";
 import { useAuth } from "../contexts/AuthContext";
 
 function emailError(value: string): string | null {

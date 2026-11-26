@@ -1,6 +1,6 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { useAuth } from "../contexts/AuthContext";
 import { useCategories } from "../hooks/useCategories";
 import { usePickupServiceMutations, usePickupServices } from "../hooks/usePickupServices";

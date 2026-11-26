@@ -1,6 +1,6 @@
 import { useActionState, useState } from "react";
 import toast from "react-hot-toast";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router";
 import { apiErrorMessage } from "../api/errors";
 import { useAuth } from "../contexts/AuthContext";
 import type { RegisterState } from "../types";
