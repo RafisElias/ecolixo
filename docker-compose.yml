@@ -6,8 +6,9 @@ services:
       POSTGRES_USER: ecolixo
       POSTGRES_PASSWORD: ecolixo123
       POSTGRES_DB: ecolixo
+    # Só nesta máquina: a senha do banco de desenvolvimento é pública.
     ports:
-      - "5433:5432"
+      - "127.0.0.1:5433:5432"
     volumes:
       # O esquema é criado e atualizado pelo Alembic ao iniciar o backend.
       - postgres_data:/var/lib/postgresql/data
@@ -29,7 +30,7 @@ services:
     environment:
       - PYTHONDONTWRITEBYTECODE=1
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     volumes:
       - ./backend:/app
       - uploads_data:/app/uploads
@@ -42,7 +43,7 @@ services:
     build: ./frontend
     container_name: ecolixo_frontend
     ports:
-      - "5173:5173"
+      - "127.0.0.1:5173:5173"
     volumes:
       # Source + config para hot-reload (sem node_modules — usa volume nomeado)
       - ./frontend/src:/app/src
