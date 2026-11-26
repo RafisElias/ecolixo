@@ -158,9 +158,13 @@ const Toolbar = memo(function Toolbar({
   isPending: boolean;
 }) {
   // Callbacks estáveis: só dependem de onFilterChange (que nunca muda)
+  // Lê o valor durante o evento: o updater roda depois (transition), quando o
+  // select controlado já voltou ao valor antigo.
   const onStatusChange = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) =>
-      onFilterChange((prev: Filters) => ({ ...prev, status: e.target.value })),
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      const status = e.target.value;
+      onFilterChange((prev: Filters) => ({ ...prev, status }));
+    },
     [onFilterChange],
   );
 
