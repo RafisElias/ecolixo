@@ -92,6 +92,24 @@ docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
 - As migrações rodam ao iniciar o backend. Não rode os scripts `seed_*.py` em produção.
 - Backup do banco: `docker compose -f docker-compose.prod.yml exec -T db pg_dump -U ecolixo -Fc ecolixo > backup.dump`.
 
+### Deploy automático
+
+Cada push na `main` que passa na CI publica na VPS (job `deploy` em
+`.github/workflows/ci.yml`, ambiente `production` do GitHub). O job entra por SSH
+com uma chave que só executa `deploy/deploy.sh` (copiado para `~/deploy.sh` no
+servidor): `git merge --ff-only`, rebuild e checagem de saúde.
+
+Configuração única no servidor, com a chave pública de deploy:
+
+```bash
+cp deploy/deploy.sh ~/deploy.sh && chmod 700 ~/deploy.sh
+echo 'restrict,command="/home/rafael/deploy.sh" ssh-ed25519 AAAA... github-actions-deploy' >> ~/.ssh/authorized_keys
+```
+
+No GitHub, ambiente `production` (restrito à `main`): secrets `DEPLOY_SSH_KEY`
+(chave privada) e `DEPLOY_KNOWN_HOSTS` (`ssh-keyscan` do servidor, conferido) e a
+variável `DEPLOY_HOST`.
+
 ## Usuários de teste
 
 | Tipo    | Nome             | Email              | Senha   |

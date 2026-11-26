@@ -58,3 +58,30 @@ jobs:
       - run: pnpm exec biome ci src/
       - run: pnpm exec tsc --noEmit
       - run: pnpm exec vitest run
+
+  # Publica na VPS depois que lint e testes passam num push para a main.
+  # A chave só executa ~/deploy.sh no servidor (comando forçado no
+  # authorized_keys): git pull --ff-only, rebuild e checagem de saúde.
+  deploy:
+    needs: [backend, frontend]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    environment:
+      name: production
+      url: https://ecolixo.duckdns.org
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    steps:
+      - name: Deploy na VPS
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+          HOST: ${{ vars.DEPLOY_HOST }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            -o ServerAliveInterval=30 "rafael@$HOST"
