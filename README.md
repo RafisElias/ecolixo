@@ -89,7 +89,10 @@ docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
 
 - `DOMAIN` precisa apontar para o IP público da VPS antes de subir, para o Caddy
   emitir o certificado.
-- As migrações rodam ao iniciar o backend. Não rode os scripts `seed_*.py` em produção.
+- As migrações rodam ao iniciar o backend. Não rode `seed_users.py`, `seed_points.py`
+  nem `seed_services.py` em produção (criam contas com senha pública).
+- Dados de demonstração para apresentação: `python seed_demo.py` (contas sem senha
+  conhecida, tudo marcado `[DEMO]`, sem pontuação); remova com `python seed_demo.py --remove`.
 - Backup do banco: `docker compose -f docker-compose.prod.yml exec -T db pg_dump -U ecolixo -Fc ecolixo > backup.dump`.
 
 ### Deploy automático
