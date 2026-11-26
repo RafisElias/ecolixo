@@ -7,3 +7,7 @@ allowBuilds:
 
 onlyBuiltDependencies:
   - esbuild
+
+# Só instala versões publicadas há pelo menos 14 dias (em minutos): dá tempo
+# de pacotes comprometidos serem detectados e retirados do registro.
+minimumReleaseAge: 20160
